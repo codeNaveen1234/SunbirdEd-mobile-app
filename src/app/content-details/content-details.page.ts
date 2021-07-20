@@ -254,11 +254,9 @@ export class ContentDetailsPage implements OnInit, OnDestroy {
       this.onboarding = extras.onboarding || this.onboarding;
     }
     this.isIOS = (window['device'].platform.toLowerCase() === "ios")
-    if(!this.isIOS) {
       this.isContentDownloading$ = this.downloadService.getActiveDownloadRequests().pipe(
         map((requests) => !!requests.find((request) => request.identifier === this.identifier))
       );
-    }
 
   }
 
