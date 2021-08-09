@@ -11,7 +11,7 @@ import { menuConstants } from '../../core/constants/menuConstants';
 import { PopoverComponent } from '../../shared/components/popover/popover.component';
 import { Subscription } from 'rxjs';
 import { DbService } from '../../core/services/db.service';
-import { LoaderService, ToastService, NetworkService } from '../../core';
+ import { LoaderService, LocalStorageService,ToastService, NetworkService } from '../../core';
 import { SyncService } from '../../core/services/sync.service';
 import { UnnatiDataService } from '../../core/services/unnati-data.service';
 import { urlConstants } from '../../core/constants/urlConstants';
@@ -21,7 +21,7 @@ import { NavigationService } from '@app/services/navigation-handler.service';
 import { CreateTaskFormComponent } from '../../shared';
 import { SharingFeatureService } from '../../core/services/sharing-feature.service';
 import { Location } from '@angular/common';
-
+import { ObservationService } from '../../observation/observation.service';
 @Component({
   selector: "app-project-detail",
   templateUrl: "./project-detail.page.html",
@@ -111,6 +111,9 @@ export class ProjectDetailPage implements OnDestroy {
     private location: Location,
     private zone: NgZone,
     private commonUtilService: CommonUtilService,
+    private localStorage: LocalStorageService,
+    private observationService: ObservationService,
+
     @Inject('CONTENT_SERVICE') private contentService: ContentService
   ) {
     this.networkFlag = this.commonUtilService.networkInfo.isNetworkAvailable;
@@ -694,44 +697,86 @@ export class ProjectDetailPage implements OnDestroy {
     return await modal.present();
   }
 
-  startAssessment(task) {
-     if (!this.networkFlag) {
-       this.toast.showMessage('FRMELEMNTS_MSG_YOU_ARE_WORKING_OFFLINE_TRY_AGAIN', 'danger');
-       return;
-     }
-    if (this.project.entityId) {
-      const config = {
-        url: urlConstants.API_URLS.START_ASSESSMENT + `${this.project._id}?taskId=${task._id}`,
-      };
-      this.unnatiService.get(config).subscribe(
-        (success) => {
-          if (!success.result) {
-            this.toast.showMessage(this.allStrings["FRMELEMNTS_MSG_CANNOT_GET_PROJECT_DETAILS"], "danger");
-            return;
-          }
-          let data = success.result;
-
-          let params = `${data.programId}-${data.solutionId}-${data.entityId}`;
-          this.router.navigate([`/${RouterLinks.OBSERVATION}/${RouterLinks.OBSERVATION_SUBMISSION}`], {
-            queryParams: {
-              programId: data.programId,
-              solutionId: data.solutionId,
-              observationId: data.observationId,
-              entityId: data.entityId,
-              entityName: data.entityName,
-              disableObserveAgain: true
-            },
-          });
-        },
-        (error) => {
-          this.toast.showMessage(this.allStrings["FRMELEMNTS_MSG_CANNOT_GET_PROJECT_DETAILS"], "danger");
-        }
-      );
-    } else {
-      this.toast.showMessage(this.allStrings["FRMELEMNTS_MSG_NO_ENTITY_MAPPED"], "danger");
-    }
-  }
-
+    startAssessment(task) {
+         if (!this.networkFlag) {
+           this.toast.showMessage('FRMELEMNTS_MSG_YOU_ARE_WORKING_OFFLINE_TRY_AGAIN', 'danger');
+           return;
+         }
+        if (this.project.entityId) {
+          const config = {
+            url: urlConstants.API_URLS.START_ASSESSMENT + `${this.project._id}?taskId=${task._id}`,
+          };
+          this.unnatiService.get(config).subscribe(
+            async (success) => {
+              console.log(success.result,"success.result");
+              if (!success.result) {
+                this.toast.showMessage(this.allStrings["FRMELEMNTS_MSG_CANNOT_GET_PROJECT_DETAILS"], "danger");
+                return;
+              }
+              let data = success.result;
+              if(data.solutionDetails.allowMultipleAssessemts){
+                this.gotoSubmissions(data)
+              }else{
+                let presentLocally
+        try {
+          presentLocally =  await this.localStorage.hasKey(this.utils.getAssessmentLocalStorageKey(data._id));
+          console.log(presentLocally,"presentLocally");
+        } catch (error) {
+          presentLocally = false
+        }
+        if (data._id && presentLocally) {
+          this.goToEcm(data._id, data.name);
+          return;
+        }
+    
+        if (!data._id || !presentLocally) {
+          let event = {
+            entityId: data.entityId,
+            observationId: data.observationId,
+            submission: {
+              submissionNumber: 1
+            }
+          };
+          this.observationService
+            .getAssessmentDetailsForObservation(event)
+            .then(subId => {
+              if (subId) {
+                this.goToEcm(subId, data.name);
+              }
+            });
+        }
+              }
+            },
+            (error) => {
+              this.toast.showMessage(this.allStrings["FRMELEMNTS_MSG_CANNOT_GET_PROJECT_DETAILS"], "danger");
+            }
+          );
+        } else {
+          this.toast.showMessage(this.allStrings["FRMELEMNTS_MSG_NO_ENTITY_MAPPED"], "danger");
+        }
+      }
+    
+      goToEcm(submissionId, entityName) {
+        this.router.navigate([RouterLinks.DOMAIN_ECM_LISTING], { 
+          queryParams: {
+            submisssionId: submissionId,
+            schoolName: entityName
+          }
+        });
+      }
+      gotoSubmissions(data){
+        let params = `${data.programId}-${data.solutionId}-${data.entityId}`;
+        this.router.navigate([`/${RouterLinks.OBSERVATION}/${RouterLinks.OBSERVATION_SUBMISSION}`], {
+          queryParams: {
+            programId: data.programId,
+            solutionId: data.solutionId,
+            observationId: data.observationId,
+            entityId: data.entityId,
+            entityName: data.entityName,
+            disableObserveAgain: true
+          },
+        });
+      }
   getProjectTaskStatus() {
     if (!this.project.tasks && !this.project.tasks.length) {
       return
