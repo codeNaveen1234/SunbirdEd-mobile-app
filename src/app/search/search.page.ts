@@ -1059,7 +1059,6 @@ export class SearchPage implements OnInit, AfterViewInit, OnDestroy, OnTabViewWi
     }
   }
 
-  // TODO: SDK changes by Swayangjit
   async navigateToBatchListPopup(content: any, layoutName?: string, retiredBatched?: any) {
     const ongoingBatches = [];
     const courseBatchesRequest: CourseBatchesRequest = {
@@ -1559,7 +1558,6 @@ export class SearchPage implements OnInit, AfterViewInit, OnDestroy, OnTabViewWi
     identifiers.forEach((value) => {
       requestParams.push({
         isChildContent: isChild,
-        // TODO - check with Anil for destination folder path
         destinationFolder: folderPath,
         contentId: value,
         correlationData: this.corRelationList !== undefined ? this.corRelationList : []
