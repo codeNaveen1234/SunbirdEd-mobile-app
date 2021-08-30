@@ -35,14 +35,14 @@ export class ApiService {
     return this.checkTokenValidation().pipe(
       mergeMap(session => {
         let headers = {
-            'Authorization': session ? 'Bearer '+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4OTU4MzIyNzkyMTE0MWJiYWE0MjA4ZTBkMjE3YmU0ZiJ9.t2OPiAMuongqwSQfdJAsokgt2Eur5t7RchNZmWOwNTg' : '',
+            'Authorization': session ? '' : '',
         //     // 'x-auth-token': session ? session.access_token : '',
             'X-authenticated-user-token': session.access_token,
             'Content-Type':'application/json'
           }
         // const httpOptions = {
         //   headers: new HttpHeaders({
-        //     'Authorization': session ? 'Bearer '+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJLM0RDRUpFYUx6U0lhVzlkWVlHOThkbEdXMlpCQXAzTSJ9.A4O9NKWHRKf8tKPdhivg1RtwUA_yKOhaCUFXe_ah2IA' : '',
+       
         //     // 'x-auth-token': session ? session.access_token : '',
         //     'X-authenticated-user-token': session.access_token,
         //     // 'X-App-Id': this.apiUtils.appName,
@@ -51,11 +51,14 @@ export class ApiService {
         //   }),
         // };
     this.ionicHttp.setDataSerializer('json');
+    console.log(session.access_token,"session.access_token");
+
         return this.ionicHttp.get(this.baseUrl + requestParam.url,'', headers).then(
           data => {
             // return observableOf(JSON.parse(data.data))
             return JSON.parse(data.data);
           }, error => {
+            console.log(error,"get error");
             catchError(this.handleError(error))
           },
         );
@@ -111,14 +114,14 @@ export class ApiService {
 
       mergeMap(session => {
         let headers = {
-            'Authorization': session ? 'Bearer '+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4OTU4MzIyNzkyMTE0MWJiYWE0MjA4ZTBkMjE3YmU0ZiJ9.t2OPiAMuongqwSQfdJAsokgt2Eur5t7RchNZmWOwNTg' : '',
+            'Authorization': session ? '' : '',
         //     // 'x-auth-token': session ? session.access_token : '',
             'X-authenticated-user-token': session.access_token,
             'Content-Type':'application/json'
           }
         // const httpOptions = {
         //   headers: new HttpHeaders({
-        //     'Authorization': session ? 'Bearer '+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJLM0RDRUpFYUx6U0lhVzlkWVlHOThkbEdXMlpCQXAzTSJ9.A4O9NKWHRKf8tKPdhivg1RtwUA_yKOhaCUFXe_ah2IA' : '',
+        //     'Authorization': session ? '' : '',
         //     // 'x-auth-token': session ? session.access_token : '',
         //     'X-authenticated-user-token': session.access_token,
         //     // 'X-App-Id': this.apiUtils.appName,
@@ -128,12 +131,14 @@ export class ApiService {
         // };
         let body = requestParam.payload ? requestParam.payload : {};
         this.ionicHttp.setDataSerializer('json');
+        console.log(session.access_token,"session.access_token");
         return this.ionicHttp.post(this.baseUrl + requestParam.url,body, headers).then(
           data => {
             // return observableOf(JSON.parse(data.data));
             return JSON.parse(data.data);
 
           }, error => {
+            console.log(error,"post error");
             catchError(this.handleError(error))
           });
       })
