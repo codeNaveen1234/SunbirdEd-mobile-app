@@ -115,7 +115,6 @@ export class QuestionnairePage implements OnInit, OnDestroy {
     this.schoolData = data;
     console.log(data,"data",this.schoolData);
     const currentEvidences = this.schoolData['assessment']['evidences'];
-    console.log(currentEvidences,"currentEvidences");
     this.enableQuestionReadOut = this.schoolData['solution']['enableQuestionReadOut'];
     this.captureGpsLocationAtQuestionLevel = this.schoolData['solution']['captureGpsLocationAtQuestionLevel'];
     this.countCompletedQuestion = this.utils.getCompletedQuestionsCount(
@@ -125,28 +124,23 @@ export class QuestionnairePage implements OnInit, OnDestroy {
     );
 
     this.selectedEvidenceId = currentEvidences[this.selectedEvidenceIndex].externalId;
-    console.log(this.selectedEvidenceId,"this.selectedEvidenceId",currentEvidences[this.selectedEvidenceIndex])
     this.localImageListKey = 'images_' + this.selectedEvidenceId + '_' + this.submissionId;
     this.isViewOnly = !currentEvidences[this.selectedEvidenceIndex]['startTime'] ? true : false;
-console.log(this.isViewOnly,"this.isViewOnly");
     this.questions =
       currentEvidences[this.selectedEvidenceIndex]['sections'][this.selectedSectionIndex]['questions'];
     this.schoolData['assessment']['evidences'][this.selectedEvidenceIndex]['sections'][
       this.selectedSectionIndex
     ].totalQuestions = this.questions.length;
-
     this.dashbordData = {
       questions: this.questions,
       evidenceMethod: currentEvidences[this.selectedEvidenceIndex]['name'],
       sectionName: currentEvidences[this.selectedEvidenceIndex]['sections'][this.selectedSectionIndex].name,
       currentViewIndex: this.start,
     };
-    console.log(this.questions,"this.questions");
     this.isCurrentEvidenceSubmitted = currentEvidences[this.selectedEvidenceIndex].isSubmitted;
-    console.log( this.isCurrentEvidenceSubmitted," this.isCurrentEvidenceSubmitted", this.isViewOnly);
-    // if (this.isCurrentEvidenceSubmitted || this.isViewOnly) {
-    //   document.getElementById('stop').style.pointerEvents = 'none';
-    // }
+    if (this.isCurrentEvidenceSubmitted || this.isViewOnly) {
+      document.getElementById('stop').style.pointerEvents = 'none';
+    }
   }
 
   ionViewWillEnter() {
