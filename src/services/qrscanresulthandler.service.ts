@@ -10,7 +10,7 @@ import {
   TelemetryObject,
   TelemetryService,
 } from 'sunbird-sdk';
-import { EventTopics, RouterLinks } from '../app/app.constant';
+import { EventTopics, RouterLinks,MimeType } from '../app/app.constant';
 
 import { CommonUtilService } from './common-util.service';
 import {
@@ -32,6 +32,9 @@ import { FormAndFrameworkUtilService } from './formandframeworkutil.service';
 import { ContentUtil } from '@app/util/content-util';
 import * as qs from 'qs';
 import { NavigationService } from './navigation-handler.service';
+import { FormConstants } from '@app/app/form.constants';
+import { SbProgressLoader, Context as SbProgressLoaderContext  } from './sb-progress-loader.service';
+import { CsPrimaryCategory } from '@project-sunbird/client-services/services/content';
 
 declare var cordova;
 
@@ -41,7 +44,8 @@ export class QRScannerResultHandler {
   source: string;
   inAppBrowserRef: any;
   scannedUrlMap: object;
-
+  private progressLoaderId: string;
+  private enableRootNavigation = false;
   constructor(
     @Inject('CONTENT_SERVICE') private contentService: ContentService,
     @Inject('TELEMETRY_SERVICE') private telemetryService: TelemetryService,
@@ -54,7 +58,8 @@ export class QRScannerResultHandler {
     private events: Events,
     private appGlobalService: AppGlobalService,
     private formFrameWorkUtilService: FormAndFrameworkUtilService,
-    private navService: NavigationService
+    private navService: NavigationService,
+    private sbProgressLoader: SbProgressLoader
   ) {
   }
 
@@ -280,7 +285,6 @@ export class QRScannerResultHandler {
   generateEndEvent(pageId: string, qrData: string) {
     if (pageId) {
       const telemetryObject = new TelemetryObject(qrData, QRScannerResultHandler.CORRELATION_TYPE, undefined);
-
       this.telemetryGeneratorService.generateEndTelemetry(
         QRScannerResultHandler.CORRELATION_TYPE,
         Mode.PLAY,
@@ -301,4 +305,216 @@ export class QRScannerResultHandler {
       undefined,
       corRelationList);
   }
+
+   // Lesser the value higher the priority
+   private validateDeeplinkPriority(matchedDeeplinkConfig, config) {
+    return (matchedDeeplinkConfig && !matchedDeeplinkConfig.priority && config.priority) ||
+      (matchedDeeplinkConfig && matchedDeeplinkConfig.priority
+        && config.priority && matchedDeeplinkConfig.priority > config.priority);
+  }
+
+  async manageLearScan(scannedData){
+    const dailcode = await this.parseDialCode(scannedData);
+    const deepLinkUrlConfig: { name: string, code: string, pattern: string, route: string, priority?: number, params?: {} }[] =
+    await this.formFrameWorkUtilService.getFormFields(FormConstants.DEEPLINK_CONFIG);
+    let matchedDeeplinkConfig: { name: string, code: string, pattern: string, route: string, priority?: number } = null;
+    let urlMatch;
+    deepLinkUrlConfig.forEach(config => {
+      const urlRegexMatch = scannedData.match(new RegExp(config.pattern));
+      if (!!urlRegexMatch && (!matchedDeeplinkConfig || this.validateDeeplinkPriority(matchedDeeplinkConfig, config))) {
+        if (config.code === 'profile' && !this.appGlobalService.isUserLoggedIn()) {
+          config.route = 'tabs/guest-profile';
+        }
+        matchedDeeplinkConfig = config;
+        urlMatch = urlRegexMatch;
+      }
+    });
+
+    if (!matchedDeeplinkConfig) {
+      return;
+    }
+    let identifier;
+    if (urlMatch && urlMatch.groups && Object.keys(urlMatch.groups).length) {
+      identifier = urlMatch.groups.quizId || urlMatch.groups.content_id || urlMatch.groups.course_id;
+    }
+    const attributeConfig = deepLinkUrlConfig.find(config => config.code === 'attributes');
+    this.handleNavigation(scannedData, identifier, dailcode, matchedDeeplinkConfig, attributeConfig.params['attributes'], urlMatch.groups);
+  }
+  private async handleNavigation(payloadUrl, identifier, dialCode, matchedDeeplinkConfig, attributeList, urlMatchGroup) {
+    const route = matchedDeeplinkConfig.route;
+      let extras = {};
+      const request = this.getRequest(payloadUrl, matchedDeeplinkConfig, attributeList);
+      if (request && (request.query || request.filters && Object.keys(request.filters).length)) {
+        extras = {
+          state: {
+            source: PageId.SPLASH_SCREEN,
+            preAppliedFilter: {
+              query: request.query || '',
+              filters: {
+                status: ['Live'],
+                objectType: ['Content'],
+                ...request.filters
+              }
+            }
+          }
+        };
+      } else if (matchedDeeplinkConfig &&
+        matchedDeeplinkConfig.pattern && matchedDeeplinkConfig.pattern.includes('manage-learn')) {
+          extras = {
+            state: {
+              data: urlMatchGroup
+            }
+          };
+      }
+      this.setTabsRoot();
+      this.navCtrl.navigateForward([route], extras);
+      this.closeProgressLoader();
+  }
+  async navigateContent(
+    identifier, isFromLink = false, content?: Content | null,
+    payloadUrl?: string, route?: string, coreRelationList?: Array<CorrelationData>
+  ) {
+    try {
+      this.appGlobalService.resetSavedQuizContent();
+       if (content) {
+        if (!route) {
+           route = this.getRouterPath(content);
+        }
+          this.setTabsRoot();
+            await this.router.navigate([route],
+              {
+                state: {
+                  content,
+                  corRelation: this.getCorrelationList(payloadUrl, coreRelationList)
+                }
+              });
+      } else {
+        if (!this.commonUtilService.networkInfo.isNetworkAvailable) {
+          this.commonUtilService.showToast('NEED_INTERNET_FOR_DEEPLINK_CONTENT');
+          this.appGlobalService.skipCoachScreenForDeeplink = false;
+          this.closeProgressLoader();
+          return;
+        }
+      }
+    } catch (err) {
+      this.closeProgressLoader();
+      console.log(err);
+    }
+  }
+  private closeProgressLoader() {
+    this.sbProgressLoader.hide({
+      id: this.progressLoaderId
+    });
+    this.progressLoaderId = undefined;
+  }
+  private getRequest(payloadUrl: string, matchedDeeplinkConfig, attributeList) {
+    if (!matchedDeeplinkConfig.params || !Object.keys(matchedDeeplinkConfig.params).length) {
+      return undefined;
+    }
+
+    const url = new URL(payloadUrl);
+    const request: {
+      query?: string;
+      filters?: {};
+    } = {};
+    const filters = this.getDefaultFilter(matchedDeeplinkConfig.params);
+    const queryParamFilters = {};
+    const urlAttributeList = [];
+    request.query = url.searchParams.get(matchedDeeplinkConfig.params.key) || '';
+    if (url.searchParams.has('se_mediums')) {
+      url.searchParams.set('medium', url.searchParams.get('se_mediums'));
+    }
+    if (url.searchParams.has('se_boards')) {
+      url.searchParams.set('board', url.searchParams.get('se_boards'));
+    }
+    if (url.searchParams.has('se_gradeLevels')) {
+      url.searchParams.set('gradeLevel', url.searchParams.get('se_gradeLevels'));
+    }
+    if (url.searchParams.has('se_subjects')) {
+      url.searchParams.set('subject', url.searchParams.get('se_subjects'));
+    }
+    url.searchParams.forEach((value, key) => {
+      urlAttributeList.push(key);
+    });
+
+    attributeList = attributeList.filter((attribute) =>  urlAttributeList.indexOf(attribute.code) >= 0
+          || urlAttributeList.indexOf(attribute.proxyCode) >= 0);
+    attributeList.forEach((attribute) => {
+      let values ;
+      if (attribute.type === 'Array') {
+         values = url.searchParams.getAll(attribute.proxyCode ? attribute.proxyCode : attribute.code);
+      } else if (attribute.type === 'String') {
+         values = url.searchParams.get(attribute.proxyCode ? attribute.proxyCode : attribute.code);
+      }
+
+      if (values && values.length) {
+        if (attribute.filter === 'custom') {
+          queryParamFilters[attribute.code] =
+                  this.getCustomFilterValues(matchedDeeplinkConfig.params, values, attribute);
+        } else {
+          queryParamFilters[attribute.code] = values;
+        }
+      }
+    });
+    request.filters = { ...filters, ...queryParamFilters };
+    return request;
+  }
+  private getDefaultFilter(deeplinkParams) {
+    if (!deeplinkParams || !deeplinkParams.data ||  !deeplinkParams.data.length) {
+      return {};
+    }
+    const defaultFilter = deeplinkParams.data.filter((param) => param.type === 'default');
+    return defaultFilter.reduce((acc, item) => {
+      acc[item.code] = item.values;
+      return acc;
+    }, {});
+  }
+
+  private getCustomFilterValues(deeplinkParams, values, attribute) {
+    if (!deeplinkParams || !deeplinkParams.data || !deeplinkParams.data.length) {
+      return [];
+    }
+    const customFilterData = deeplinkParams.data.find((param) => param.type === 'custom' && param.code === attribute.code);
+    let customFilterOptions = [];
+    if (customFilterData && customFilterData.values) {
+      values.forEach((v) => {
+          const customFilterValues = customFilterData.values.find(m => m.name === v);
+          customFilterOptions = customFilterOptions.concat(customFilterValues ? customFilterValues.options : []);
+      });
+    }
+    return customFilterOptions;
+    }
+      private getCorrelationList(payloadUrl, corRelation?: Array<CorrelationData>) {
+    if (!corRelation) {
+      corRelation = [];
+    }
+    if (payloadUrl) {
+      corRelation.push({
+        id: ContentUtil.extractBaseUrl(payloadUrl),
+        type: CorReleationDataType.SOURCE
+      });
+    }
+    return corRelation;
+  }
+    private setTabsRoot() {
+      if (this.enableRootNavigation) {
+        try {
+        //  this.location.replaceState(this.router.serializeUrl(this.router.createUrlTree([RouterLinks.TABS])));
+        } catch (e) {
+          console.log(e);
+        }
+        this.enableRootNavigation = false;
+      }
+    }
+    private getRouterPath(content) {
+      let route;
+      if (content.primaryCategory === CsPrimaryCategory.COURSE.toLowerCase()) {
+        route = RouterLinks.ENROLLED_COURSE_DETAILS;
+      } else if (content.mimeType === MimeType.COLLECTION) {
+        route = RouterLinks.COLLECTION_DETAIL_ETB;
+      } else {
+        route = RouterLinks.CONTENT_DETAILS;
+      }
+      return route;
+    }
 }
