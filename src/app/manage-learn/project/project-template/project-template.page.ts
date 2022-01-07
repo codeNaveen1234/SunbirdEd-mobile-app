@@ -188,8 +188,7 @@ export class ProjectTemplatePage {
     } catch (error) {
       console.log(error);
     }
-
-    if (resp && resp.result) {
+    if (resp && resp.result && resp.result._id) {
       this.router
         .navigate([`/${RouterLinks.PROJECT}`], {
           queryParams: {
@@ -205,6 +204,8 @@ export class ProjectTemplatePage {
             },
           });
         });
+    }else{
+      this.toast.showMessage(resp?.message,'danger');
     }
   }
 }

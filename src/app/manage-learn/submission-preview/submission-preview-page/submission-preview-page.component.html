@@ -56,7 +56,7 @@
               <div *ngFor="let answer of question.pageQuestions; let k = index" class="matrixQuestion">
                 <div *ngIf="answer?.responseType === 'matrix'; else notMatrix">
                   <div *ngIf="answer.value">
-                    <!-- <h3>Q{{ i + 1 }}. {{ answer?.question[0] }}</h3> -->
+                    <h3>Q{{ i + 1 }}. {{ answer?.question[0] }}</h3>
                     <div *ngFor="let instance of answer.value; let j = index" class="instanceQuest">
                       <h5 class="instacnce">{{ answer?.instanceIdentifier }} {{ j + 1 }}</h5>
                       <div *ngFor="let ans of instance; let k = index" class="matrixQuestion">
