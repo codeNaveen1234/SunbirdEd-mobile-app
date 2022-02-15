@@ -1510,7 +1510,7 @@
   "FRMELEMNTS_LBL_EARNYOURCERT" : "Completion certificate will be issued upon 100% completion",
   "FRMELEMNTS_MSG_INVALID_LINK":"Invalid Link, please try with other link",
   "FRMELEMNTS_MSG_TEMPLATE_DETAILS_NOTFOUND":"Template details not found",
-  "FRMELEMNTS_MSG_CONTENT_NOT_AVAILABLE_FOR_ROLE":"This content is not available for your role",
+  "FRMELEMNTS_MSG_CONTENT_NOT_AVAILABLE_FOR_ROLE":"This resources is not relevant for your role",
   "FRMELEMNTS_MSG_PLEASE_LOGIN_HT_OTHER":"Please login as HT & Other Officials to access this content",
   "FRMELEMNTS_LBL_SYNC":"Sync",
   "FRMELEMNTS_LBL_PROJECT_DETAILS":"Project details",
@@ -1544,5 +1544,7 @@
   "FRMELEMNTS_LBL_PROJECTS_STARTED":"Projects Started",
   "FRMELEMNTS_LBL_WEEKLY":"Weekly",
   "FRMELEMNTS_LBL_MONTHLY":"Monthly",
-  "FRMELEMNTS_LBL_QUARTERLY":"Quarterly"
+  "FRMELEMNTS_LBL_QUARTERLY":"Quarterly",
+  "FRMELEMENTS_MSG_ONLY_REGISTERED_USERS_CAN_TAKE_PROJECT": "Only registered users can take project",
+  "FRMELEMENTS_MSG_PROJECT_ALREADY_SYNCED" :"Your project has been completed and synced, no further syncs are allowed to this project"
 }
