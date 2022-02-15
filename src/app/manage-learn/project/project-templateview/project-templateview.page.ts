@@ -227,7 +227,8 @@ export class ProjectTemplateviewPage implements OnInit {
         isProfileInfoRequired: true,
         hasAcceptedTAndC: this.project.hasAcceptedTAndC,
         detailsPayload: this.stateData ? this.stateData : null,
-        templateId: this.templateId
+        templateId: this.templateId,
+        replaceUrl: true
       }
       this.projectService.getProjectDetails(payload);
     }
