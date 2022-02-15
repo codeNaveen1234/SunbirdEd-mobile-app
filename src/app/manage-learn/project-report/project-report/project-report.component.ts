@@ -156,6 +156,9 @@ export class ProjectReportComponent {
       if (key == statusType.notStarted) {
         color.push({ color: '#DA090D', pos: count });
       }
+      if (key == statusType.started) {
+        color.push({ color: '#ffd31a', pos: count });
+      }
       count++;
     }
 
