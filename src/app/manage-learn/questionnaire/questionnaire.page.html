@@ -1,6 +1,13 @@
 <ion-content #pageTop>
   <div   id="stop">
   <div class="_container"  *ngIf="submissionId || extrasState">
+    <ion-list>
+      <ion-item lines="none">
+        <ion-label class="mt-15">
+          <div class="title">{{ sectionHeader | titlecase }}</div>
+        </ion-label>
+      </ion-item>
+    </ion-list>
     <ng-container *ngFor="let question of questions| slice:start:end; let i=index">
       <ng-container [ngSwitch]="question.responseType.toLowerCase()">
         <app-text-type-input [inputIndex]="start + 1" [evidenceId]="selectedEvidenceId" [submissionId]="submissionId"

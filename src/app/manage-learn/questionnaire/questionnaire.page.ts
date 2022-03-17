@@ -47,6 +47,7 @@ export class QuestionnairePage implements OnInit, OnDestroy {
   enableQuestionReadOut: boolean;
   networkAvailable;
   isTargeted :boolean;
+  sectionHeader:any;
   constructor(
     // public navCtrl: NavController,
     // public navParams: NavParams,
@@ -131,6 +132,7 @@ export class QuestionnairePage implements OnInit, OnDestroy {
     this.schoolData['assessment']['evidences'][this.selectedEvidenceIndex]['sections'][
       this.selectedSectionIndex
     ].totalQuestions = this.questions.length;
+    this.sectionHeader =currentEvidences[this.selectedEvidenceIndex]['sections'][this.selectedSectionIndex].name;
     this.dashbordData = {
       questions: this.questions,
       evidenceMethod: currentEvidences[this.selectedEvidenceIndex]['name'],
