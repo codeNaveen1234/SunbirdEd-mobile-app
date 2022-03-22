@@ -147,6 +147,7 @@ export class TaskViewPage {
   }
   public addSubtask() {
     if (this.newSubtask.name) {
+      this.newSubtask.isDeletable = true;
       !this.task.children ? (this.task.children = []) : "";
       this.task.children.push(this.newSubtask);
       this.enableTaskMarkButton();
@@ -355,14 +356,11 @@ export class TaskViewPage {
          }
         break
       case 'subtask':
-        name = " Edit Assignee’s Name"
-        break
-        case 'subtask':
         if(subtask.isDeletable){
           name = "Edit Subtask"
           this.openEditModal(what,name,placeholder,subtask,subTaskIndex);
          }
-        break
+      break
     }
   }
 

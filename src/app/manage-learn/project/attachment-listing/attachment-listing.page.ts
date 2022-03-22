@@ -37,6 +37,7 @@ export class AttachmentListingPage implements OnInit {
   tabsLength;
   statuses = statusType;
   viewOnly: boolean = false;
+  selectedTab;
   constructor(
     private db: DbService,
     private platform: Platform,
@@ -56,8 +57,9 @@ export class AttachmentListingPage implements OnInit {
       this.projectId = parameters.id;
       this.tabs = this.util.getTabs();
       this.tabsLength = this.tabs.length;
+      this.selectedTab = this.tabs[0].value;
       this.attachments = {
-        project: [],
+        project: {},
         tasks: []
       };
       this.getProject();
@@ -86,54 +88,59 @@ export class AttachmentListingPage implements OnInit {
   }
   segmentChanged(event) {
     this.type = event.detail.value;
+    this.tabs.find(tab => {
+      if (tab.type == this.type) {
+        this.selectedTab = tab.value;
+      }
+    })
+    this.getAttachments();
+  }
+  getAttachments() {
     this.attachments = {
-      project: [],
+      project: {},
       tasks: []
     };
-    this.getAttachments(this.type);
-  }
-  getAttachments(tab) {
-    if (this.project.status == this.statuses.submitted && this.project.attachments.length) {
+    if (this.project.status == this.statuses.submitted) {
       let evidence = {
         title: this.project.title,
-        remarks: this.project.remarks,
+        remarks: this.project.remarks ? this.project.remarks : '',
         attachments: []
       }
-      this.project.attachments.forEach(attachment => {
-        if (attachment.type == tab) {
-          attachment.type != 'link' ? this.getEvidences(attachment, evidence) : evidence.attachments.push(attachment);
-        }
-      });
-      if (evidence.attachments.length) {
-        this.attachments.project.push(evidence);
+      if(this.project.attachments && this.project.attachments.length){
+        this.getEvidences(this.project.attachments, evidence);
+      }
+      if ((this.type == 'image/jpeg' && evidence.remarks) || evidence.attachments.length) {
+        this.attachments.project=evidence;
       }
     }
     if (this.project.tasks && this.project.tasks.length) {
       this.project.tasks.forEach(task => {
         let evidence = {
           title: task.name,
-          remarks: task.remarks,
+          remarks: task.remarks ? task.remarks : '',
           attachments: []
         }
         if (task.attachments && task.attachments.length) {
-          task.attachments.forEach(attachment => {
-            if (attachment.type == tab) {
-              attachment.type != 'link' ? this.getEvidences(attachment, evidence) : evidence.attachments.push(attachment);
-            }
-          });
+          this.getEvidences(task.attachments, evidence);
         }
-        if (evidence.attachments.length) {
+        if ((this.type == 'image/jpeg' && evidence.remarks) || evidence.attachments.length) {
           this.attachments.tasks.push(evidence);
         }
       });
     }
   }
 
-  getEvidences(attachment, evidence) {
-    attachment.localUrl = !attachment.url ? this.win.Ionic.WebView.convertFileSrc(
-      this.path + attachment.name
-    ) : '';
-    evidence.attachments.push(attachment);
+  getEvidences(attachments, evidence) {
+    attachments.forEach(attachment => {
+      if (attachment.type == this.type) {
+        if(attachment.type != 'link'){
+          attachment.localUrl = !attachment.url ? this.win.Ionic.WebView.convertFileSrc(
+            this.path + attachment.name
+          ) : '';
+        }
+        evidence.attachments.push(attachment);
+      }
+    });
   }
 
   getProject() {
@@ -142,7 +149,8 @@ export class AttachmentListingPage implements OnInit {
         if (success?.docs.length) {
           this.project = success.docs[0];
           this.viewOnly = this.project.status == statusType.submitted ? true : false;
-          this.getAttachments(this.tabs[0].type);
+          this.type=this.tabs[0].type;
+          this.getAttachments();
         }
       },
       (error) => { }
@@ -170,22 +178,22 @@ export class AttachmentListingPage implements OnInit {
       .then(() => { console.log('File is opened'); })
       .catch(e => console.log('Error opening file', e));
   }
-  async deleteConfirmation(attachment, index) {
+  async deleteConfirmation(attachment) {
     let data;
-    this.translate.get(['FRMELEMNTS_MSG_DELETE_ATTACHMENT_CONFIRM', 'OK', 'CANCEL']).subscribe((text) => {
+    this.translate.get(['FRMELEMNTS_LBL_ATTACHMENT_DELETE_CONFIRMATION', 'YES', 'NO']).subscribe((text) => {
       data = text;
     });
     const alert = await this.alert.create({
       cssClass: 'attachment-delete-alert',
-      message: data['FRMELEMNTS_MSG_DELETE_ATTACHMENT_CONFIRM'],
+      message: data['FRMELEMNTS_LBL_ATTACHMENT_DELETE_CONFIRMATION'] + ' ' + this.selectedTab,
       buttons: [
         {
-          text: data['OK'],
+          text: data['YES'],
           handler: () => {
-            this.deleteAttachment(attachment, index);
+            this.deleteAttachment(attachment);
           },
         }, {
-          text: data['CANCEL'],
+          text: data['NO'],
           role: "cancel",
           cssClass: "secondary",
           handler: (blah) => {
@@ -197,9 +205,39 @@ export class AttachmentListingPage implements OnInit {
     await alert.present();
   }
   deleteImage(event) {
-    this.deleteConfirmation(event.data, event.index);
+    this.deleteConfirmation(event.data);
   }
-  deleteAttachment(attachment, index) {
-    attachment.splice(index, 1);
+  deleteAttachment(attachment) {
+    if (this.project.tasks && this.project.tasks.length) {
+      let loopAgain : boolean = true;
+      this.project.tasks.forEach(task => {
+        if(loopAgain && task.attachments && task.attachments.length){
+          let i = _.findIndex(task.attachments, (item) => {
+          if(item.type == this.type){
+              return item.name == attachment.name;
+          }
+          });
+          if(i >= 0){
+            task.attachments.splice(i, 1);
+           loopAgain = false;
+          }
+        }
+      });
+    }
+    this.updateLocalDb();
+    this.getAttachments();
+  }
+  attachmentAction(event) {
+    if (event.action == 'delete') {
+      this.deleteConfirmation(event.attachment);
+    } else if (event.action == 'view') {
+      this.viewDocument(event.attachment)
+    }
+  }
+  updateLocalDb() {
+    this.project.isEdit = true;
+    this.db.update(this.project).then(success => {
+      this.project._rev = success.rev;
+    })
   }
 }

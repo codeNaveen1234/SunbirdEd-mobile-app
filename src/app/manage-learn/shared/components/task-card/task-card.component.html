@@ -11,7 +11,7 @@
           <div class="mandatory-ribben-label" *ngIf="!task.isDeletable">
             {{'FRMELEMNTS_LBL_MANDATORY' | translate}}
           </div>
-          <div *ngIf="!viewOnly" class="options">
+          <div class="options">
             <ion-buttons>
               <ion-icon name="ellipsis-vertical-outline" class="action-icon" color="primary"
                 (click)="$event.stopPropagation();openPopover($event,i)">
@@ -26,7 +26,7 @@
           <div> {{(task?.endDate) ? (task.endDate | date : 'dd/MM/yyyy') : ""}}</div>
           <div class="viewBtn">
             <ion-label class="link-label" *ngIf="task?.type =='simple'"
-              (click)="$event.stopPropagation();openTask(task)">
+              (click)="$event.stopPropagation();onCardClick(task)">
               {{'FRMELEMNTS_BTN_VIEW_TASK_DETAILS' | translate}}<ion-icon name="chevron-forward"></ion-icon>
             </ion-label>
             <ion-button size="small" class="action-btn" *ngIf="task?.type=='content'&&task?.learningResources?.length"
@@ -36,7 +36,7 @@
             <ion-button size="small" class="action-btn"
               *ngIf="(task?.type=='assessment' || task?.type=='observation')&&task?.status!='completed' "
               (click)="$event.stopPropagation();onObservatonActionButtonClick(task, i)">
-              {{'START' | translate}} {{task?.type}}
+              {{'START' | translate}} {{task?.type | titlecase}}
             </ion-button>
             <ion-button size="small" class="action-btn"
               *ngIf="(task?.type=='assessment' || task?.type=='observation')&&task?.status=='completed' "
