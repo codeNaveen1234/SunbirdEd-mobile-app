@@ -32,14 +32,14 @@ fdescribe('ProjectListingComponent', () =>{
             },
           })) as any};
           const mockRouterParams: Partial<ActivatedRoute> = {queryParams: of({})};
-        const mockLocation: Partial<Location> = {};
-        const mockHeaderService: Partial<AppHeaderService> = {};
-        const mockPlatform: Partial<Platform> = {};
-        const mockUnnatiService: Partial<UnnatiDataService> = {};
-        const mockKendra: Partial<KendraApiService> = {};
-        const mockLoader: Partial<LoaderService> = {};
-        const mockTranslate: Partial<TranslateService> = {get: jest.fn(() => of(''))};
-        const mockUtils: Partial<UtilsService> = {
+          const mockLocation: Partial<Location> = {};
+          const mockHeaderService: Partial<AppHeaderService> = {};
+          const mockPlatform: Partial<Platform> = {};
+          const mockUnnatiService: Partial<UnnatiDataService> = {};
+          const mockKendra: Partial<KendraApiService> = {};
+          const mockLoader: Partial<LoaderService> = {};
+          const mockTranslate: Partial<TranslateService> = {get: jest.fn(() => of(''))};
+          const mockUtils: Partial<UtilsService> = {
             setProfileData: jest.fn(() => Promise.resolve({ generatedKey: 'sa', userData: 'data' })),
             closeProfileAlert: jest.fn(),
             getProfileData: jest.fn(),
@@ -125,19 +125,68 @@ fdescribe('ProjectListingComponent', () =>{
               url:'',
               payload:''
             }
-            // mockKendra.post = jest.fn();
             projectListingComponent.getCreatedProjects();
             projectListingComponent.getProjectList();
             mockUtils.getProfileInfo = jest.fn(() => Promise.resolve(true));
-            // expect(mockKendra.post).toHaveBeenCalled();
            expect(projectListingComponent.projects).toBeTruthy();
           })
 
           it('Navigate to create project page',() =>{
-            expect(mockRouter.navigate).toHaveBeenCalledWith(['/', 'project/create-project']);
-            // expect(mockLocation.path()).toBe('/project/create-project');
+            mockRouter.navigate = jest.fn();
+            let data = true;
+            projectListingComponent.createProject(data);
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['/project/create-project'],{
+              queryParams: {
+                hasAcceptedTAndC: data
+              },
+            });
           })
-         
+
+        describe('get Projects',() =>{
+          // projectListingComponent.getDownloadedProjects(['_id'])
+        let offilineIdsArr =  [];
+        mockLoader.startLoader = jest.fn(() => Promise.resolve());
+        mockLoader.stopLoader = jest.fn(() => Promise.resolve());
+        projectListingComponent.selectedFilterIndex = 1;
+        let selectedFilter;
+        switch (projectListingComponent.selectedFilterIndex) {
+            case 0:
+                selectedFilter = 'assignedToMe';
+                projectListingComponent.noDataFound = 'FRMELEMNTS_LBL_ASSIGNED_PROJECT_NOT_FOUND';
+                break;
+            case 1:
+                selectedFilter = 'discoveredByMe';
+                projectListingComponent.noDataFound = 'FRMELEMNTS_LBL_DISCOVERED_PROJECT_NOT_FOUND';
+                break;
+            case 2:
+                selectedFilter = 'createdByMe';
+                projectListingComponent.noDataFound = 'FRMELEMNTS_LBL_CREATED_PROJECT_NOT_FOUND';
+                break;
+            default:
+                break;
+        }
+        projectListingComponent.payload = !projectListingComponent.payload ?  mockUtils.getProfileInfo() :projectListingComponent.payload;
+        let config = {
+          url: '',
+          payload: selectedFilter !== 'createdByMe' ? projectListingComponent.payload : ''
+      }
+        })
+    //       describe('Loadmore', () => {
+    //     it('Should load more projects based on limit and page.', (done) => {
+    //         //arrange
+    //         projectListingComponent.page = 0;
+    //         // act
+    //         mockLoader.startLoader = jest.fn(() => Promise.resolve());
+    //         mockLoader.stopLoader = jest.fn(() => Promise.resolve());
+    //         projectListingComponent.loadMore();
+    //         projectListingComponent.getProjectList();
+    //         // assert 
+    //         setTimeout(() => {
+    //             expect(projectListingComponent.page).toBe(1);
+    //             done();
+    //         }, 0);
+    //     })
+    // })
 })
 
 // describe('ProjectListingComponent', () => {
