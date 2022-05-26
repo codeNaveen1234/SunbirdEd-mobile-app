@@ -116,17 +116,12 @@ export class DomainEcmLsitingComponent {
     for (const evidence of this.entityEvidences) {
       let totalQuestions = 0;
       let completedQuestions = 0;
-      let sectionLength = evidence.sections.length
-      let completedSections = 0;
       for (const section of evidence.sections) {
         totalQuestions = totalQuestions + section.totalQuestions;
         completedQuestions = completedQuestions + section.completedQuestions;
-        if(section.progressStatus ===  "completed"){
-          completedSections += 1;
-        }
       }
-      let percentage = totalQuestions ? (completedQuestions / totalQuestions) * 100 : completedSections ? (completedSections/sectionLength) * 100 : 0;
-      if (!completedQuestions && !completedSections) {
+      let percentage = totalQuestions ? (completedQuestions / totalQuestions) * 100 : 0;
+      if (!completedQuestions) {
         percentage = 0;
       }
       evidence.completePercentage = Math.trunc(percentage);
@@ -174,7 +169,7 @@ export class DomainEcmLsitingComponent {
       selectedEvidence: evidenceIndex,
       entityDetails: this.entityData,
     };
-    return 'view'
+    return await this.evdnsServ.openActionSheet(options, 'FRMELEMNTS_LBL_OBSERVATION');
   }
 
   async openEvidence(evidenceIndex) {
@@ -293,9 +288,6 @@ export class DomainEcmLsitingComponent {
     } catch {
       this.loader.stopLoader()
     }
-  }
-  notApplicableClick(selectedSectionIndex){
-    this.evdnsServ.openConfirmation(this.entityData,selectedSectionIndex,this.submissionId)
   }
   ngOnDestroy() {
     if (this._networkSubscription) {
