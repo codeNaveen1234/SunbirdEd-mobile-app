@@ -34,13 +34,12 @@ export class FooterButtonsComponent implements OnChanges {
   @Output() backAction = new EventEmitter();
   @Output() openSheetAction = new EventEmitter();
   @Output() startAction = new EventEmitter();
-  @Output() allowStart = new EventEmitter();
   @Input() completedQuestionCount = 0;
   @Input() questionCount = 0;
   @Input() isSubmitted;
   @Input() enableGps;
   @Input() showSubmit;
-  @Input() viewOnly:boolean;
+
 
   percentage: number = 0;
 
@@ -122,10 +121,6 @@ export class FooterButtonsComponent implements OnChanges {
 
   openAction() {
     this.openSheetAction.emit()
-  }
-
-  allowStartingObservation(){
-    this.allowStart.emit();
   }
 
   startBtnAction(){
