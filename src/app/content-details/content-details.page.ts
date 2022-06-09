@@ -190,6 +190,7 @@ export class ContentDetailsPage implements OnInit, OnDestroy {
   config: any;
   nextContentToBePlayed: any;
   isPlayerPlaying = false;
+
   constructor(
     @Inject('PROFILE_SERVICE') private profileService: ProfileService,
     @Inject('CONTENT_SERVICE') private contentService: ContentService,
@@ -620,10 +621,12 @@ export class ContentDetailsPage implements OnInit, OnDestroy {
         this.showSwitchUserAlert(false);
       }
     }
-    if (this.content.mimeType === 'video/mp4' || this.content.mimeType === 'video/webm') {
+    if ( (this.content.mimeType === 'video/mp4' || this.content.mimeType === 'video/webm') && !this.content.contentData["interceptionPoints"] ) {
+      this.getNextContent(data.hierarchyInfo, data.identifier);
       this.playContent(true, true);
     }
   }
+
   getImageContent() {
     if(this.platform.is('ios')) {
       return this.sanitizer.bypassSecurityTrustUrl(this.content.contentData.appIcon);
@@ -1628,7 +1631,7 @@ export class ContentDetailsPage implements OnInit, OnDestroy {
       const batchDetails = await this.courseService.getBatchDetails({ batchId }).toPromise();
       for (var key in batchDetails.cert_templates) {
         return (batchDetails && batchDetails.cert_templates[key] &&
-        batchDetails.cert_templates[key].description) || '';
+          batchDetails.cert_templates[key].description) || '';
       }
     } catch (e) {
       console.log(e);
