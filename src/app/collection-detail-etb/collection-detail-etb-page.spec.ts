@@ -72,7 +72,8 @@ describe('collectionDetailEtbPage', () => {
     };
     const mockCommonUtilService: Partial<CommonUtilService> = {
         networkInfo: {} as any,
-        showToast: jest.fn()
+        showToast: jest.fn(),
+        appendTypeToPrimaryCategory: jest.fn(() => 'digitaltextbook-detail')
     };
     const mocktelemetryGeneratorService: Partial<TelemetryGeneratorService> = {
         generateBackClickedTelemetry: jest.fn(),
@@ -175,7 +176,7 @@ describe('collectionDetailEtbPage', () => {
 
     it('should get the appName', () => {
         // arrange
-        mockCommonUtilService.getAppName = jest.fn(() => Promise.resolve('diksha'));
+        mockCommonUtilService.getAppName = jest.fn(() => Promise.resolve('Sunbird'));
         mockDownloadService.trackDownloads = jest.fn(() => of());
         mockCommonUtilService.translateMessage = jest.fn(() => 'play');
         // act
@@ -263,6 +264,72 @@ describe('collectionDetailEtbPage', () => {
             expect(collectionDetailEtbPage.setCollectionStructure).toHaveBeenCalled();
             done();
         }, 0);
+    });
+
+    describe('markContent', () => {
+        it('should update content last access time', (done) => {
+            // arrange
+            mockappGlobalService.getCurrentUser = jest.fn(() => ({
+                uid: 'sample-uid'
+            }));
+            mockProfileService.addContentAccess = jest.fn(() => of(true));
+            mockevents.publish = jest.fn();
+            mockContentService.setContentMarker = jest.fn(() => of(true));
+            // act
+            collectionDetailEtbPage.markContent();
+            // assert
+            setTimeout(() => {
+                expect(mockappGlobalService.getCurrentUser).toHaveBeenCalled();
+                expect(mockProfileService.addContentAccess).toHaveBeenCalledWith({
+                    contentId: 'do_212911645382959104165',
+                    contentType: 'Course',
+                    status: 1
+                });
+                expect(mockevents.publish).toHaveBeenCalledWith(EventTopics.LAST_ACCESS_ON, true);
+                expect(mockContentService.setContentMarker).toHaveBeenCalledWith(
+                    {
+                        contentId: 'do_212911645382959104165',
+                        data: undefined,
+                        extraInfo: {},
+                        isMarked: true,
+                        marker: 1,
+                        uid: 'sample-uid'
+                    }
+                );
+                done();
+            }, 0);
+        });
+
+        it('should not update content last access time for else part', (done) => {
+            // arrange
+            mockappGlobalService.getCurrentUser = jest.fn(() => ({
+                uid: 'sample-uid'
+            }));
+            mockProfileService.addContentAccess = jest.fn(() => of(false));
+            mockContentService.setContentMarker = jest.fn(() => of(true));
+            // act
+            collectionDetailEtbPage.markContent();
+            // assert
+            setTimeout(() => {
+                expect(mockappGlobalService.getCurrentUser).toHaveBeenCalled();
+                expect(mockProfileService.addContentAccess).toHaveBeenCalledWith({
+                    contentId: 'do_212911645382959104165',
+                    contentType: 'Course',
+                    status: 1
+                });
+                expect(mockContentService.setContentMarker).toHaveBeenCalledWith(
+                    {
+                        contentId: 'do_212911645382959104165',
+                        data: undefined,
+                        extraInfo: {},
+                        isMarked: true,
+                        marker: 1,
+                        uid: 'sample-uid'
+                    }
+                );
+                done();
+            }, 0);
+        });
     });
 
     describe('IonViewWillEnter', () => {
@@ -410,7 +477,7 @@ describe('collectionDetailEtbPage', () => {
                 rollUp: mockObjRollup,
                 correlationList: mockCorRelationList,
                 hierachyInfo: undefined,
-            }, PageId.COLLECTION_DETAIL);
+            }, collectionDetailEtbPage.pageId);
         });
 
         it('should navigate back if deletion is complete', () => {
@@ -446,7 +513,7 @@ describe('collectionDetailEtbPage', () => {
             expect(mocktelemetryGeneratorService.generateInteractTelemetry).toHaveBeenCalledWith(InteractType.TOUCH,
                 InteractSubtype.DOWNLOAD_CLICKED,
                 Environment.HOME,
-                PageId.COLLECTION_DETAIL,
+                collectionDetailEtbPage.pageId,
                 mockTelemetryObject,
                 undefined,
                 mockObjRollup,
@@ -526,7 +593,7 @@ describe('collectionDetailEtbPage', () => {
                 InteractType.TOUCH,
                 InteractSubtype.UNIT_CLICKED,
                 Environment.HOME,
-                PageId.COLLECTION_DETAIL,
+                collectionDetailEtbPage.pageId,
                 mockTelemetryObject,
                 values,
                 {},
@@ -559,7 +626,7 @@ describe('collectionDetailEtbPage', () => {
                 InteractType.TOUCH,
                 InteractSubtype.UNIT_CLICKED,
                 Environment.HOME,
-                PageId.COLLECTION_DETAIL,
+                collectionDetailEtbPage.pageId,
                 mockTelemetryObject,
                 values,
                 {},
@@ -615,7 +682,7 @@ describe('collectionDetailEtbPage', () => {
             expect(mocktelemetryGeneratorService.generateEndTelemetry).toHaveBeenCalledWith(
                 CsContentType.TEXTBOOK,
                 Mode.PLAY,
-                PageId.COLLECTION_DETAIL,
+                collectionDetailEtbPage.pageId,
                 Environment.HOME,
                 mockTelemetryObject,
                 {},
@@ -649,7 +716,7 @@ describe('collectionDetailEtbPage', () => {
             expect(mocktelemetryGeneratorService.generateEndTelemetry).toHaveBeenCalledWith(
                CsPrimaryCategory.DIGITAL_TEXTBOOK,
                 Mode.PLAY,
-                PageId.COLLECTION_DETAIL,
+                collectionDetailEtbPage.pageId,
                 Environment.HOME,
                 { id: 'do_12345', type: undefined, version: '1' },
                 {},
@@ -671,7 +738,7 @@ describe('collectionDetailEtbPage', () => {
             expect(mocktelemetryGeneratorService.generateEndTelemetry).toHaveBeenCalledWith(
                 CsContentType.TEXTBOOK,
                 Mode.PLAY,
-                PageId.COLLECTION_DETAIL,
+                collectionDetailEtbPage.pageId,
                 Environment.HOME,
                 mockTelemetryObject,
                 {},
@@ -692,7 +759,7 @@ describe('collectionDetailEtbPage', () => {
         // assert
         expect(subscribeWithPriorityData).toBeTruthy();
         expect(mocktelemetryGeneratorService.generateBackClickedTelemetry).toHaveBeenCalledWith(
-            PageId.COLLECTION_DETAIL,
+            collectionDetailEtbPage.pageId,
             Environment.HOME,
             false,
             'do_212911645382959104165',
@@ -923,7 +990,7 @@ describe('collectionDetailEtbPage', () => {
                 expect(mockContentService.importContent).toHaveBeenCalled();
                 expect(mockzone.run).toHaveBeenCalled();
                 expect(mocktelemetryGeneratorService.generateDownloadAllClickTelemetry).toHaveBeenCalledWith(
-                    'collection-detail',
+                    collectionDetailEtbPage.pageId,
                     undefined,
                     ['do-123'],
                     2
@@ -932,7 +999,7 @@ describe('collectionDetailEtbPage', () => {
                     Environment.HOME,
                     TelemetryErrorCode.ERR_DOWNLOAD_FAILED,
                     ErrorType.SYSTEM,
-                    PageId.COLLECTION_DETAIL,
+                    collectionDetailEtbPage.pageId,
                     '{"parentIdentifier":"do_212911645382959104165","faultyIdentifiers":["do-234"]}'
                 );
                 expect(mockCommonUtilService.showToast).toHaveBeenCalledWith('UNABLE_TO_FETCH_CONTENT');

@@ -217,7 +217,7 @@ export enum ImpressionSubtype {
     UPGRADE_POPUP = 'upgrade-popup',
     DEEPLINK = 'deeplink',
     CREATE_GROUP_FORM = 'create-group-form',
-    DISPLAY_DIKSHA_ID_TUTORIAL = 'display-diksha-id-tutorial',
+    DISPLAY_SUNBIRD_ID_TUTORIAL = 'display-sunbird-id-tutorial',
     GROUP_TUTORIAL = 'my-group-tutorial-popup',
     OFFLINE_MODE = 'offline-mode',
     AUTO = 'auto',
@@ -554,7 +554,7 @@ export enum InteractSubtype {
     KEYCLOAK = 'keycloak',
     GOOGLE = 'google',
     APPLE = 'apple',
-    STATE = 'download-clicked',
+    STATE = 'state',
 }
 
 export enum ID {

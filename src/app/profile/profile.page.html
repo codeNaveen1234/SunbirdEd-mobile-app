@@ -22,15 +22,10 @@
             <span class="app-name"> {{appName}} </span>
             <span class="txt-uppercase"> {{'ID' | translate }}: </span>
             <span>{{profile?.userName}}</span>
-            <span class="profile-share-icon" (click)="shareUsername()">
-                <ion-icon role="button" aria-label="Share profile" name="share-social" class="share-icon"></ion-icon>
+            <span role="button" aria-label="Share profile" class="profile-share-icon" (click)="shareUsername()" tabindex="0">
+                <ion-icon name="share-social" aria-hidden="true" class="share-icon"></ion-icon>
             </span>
         </p>
-        <div class="school-recent" *ngIf="organisationName">
-            <h6 class="bolder MB5" style="position: relative; font-size: 1.2rem;">{{organisationName}}
-
-            </h6>
-        </div>
     </div>
     <div class="roles-container ion-text-center ion-padding-horizontal">
         <div class="MB5 ion-text-center" *ngFor="let role of roles | slice : startLimit:rolesLimit;">
@@ -56,47 +51,47 @@
     <div class="location-mapping-block">
     <div *ngIf="profile?.persona?.name" class="text-center">
         <div>
-            <span class="bolder">{{'FRMELEMNTS_LBL_PERSONA' | translate}}: </span>
-            <span>{{profile?.persona?.name}}</span>
+            <span>{{'FRMELEMNTS_LBL_PERSONA' | translate}}: </span>
+            <span class="bolder">{{profile?.persona?.name}}</span>
         </div>
     </div>
-    <div *ngIf="profile?.subPersona" class="text-center">
+    <div *ngIf="profile?.subPersona && profile?.subPersona.length" class="text-center">
         <div>
-            <span class="bolder">{{'FRMELEMNTS_LBL_SUBPERSONA' | translate}}: </span>
-            <span>{{profile?.subPersona}}</span>
+            <span>{{'FRMELEMNTS_LBL_SUBPERSONA' | translate}}: </span>
+            <span class="bolder">{{profile?.subPersona.join(', ')}}</span>
         </div>
+    </div>
+    <div *ngIf="userLocation?.state && userLocation?.state?.name && userLocation?.state?.name?.length">
+        <span>{{'STATE' | translate}}: </span>
+        <span class="bolder">{{userLocation.state.name}}</span>
+        <span *ngIf="!(userLocation?.state && userLocation?.state?.name && userLocation?.state?.name?.length)"
+            class="lighter">{{'ADD_STATE' | translate}}</span>
+    </div>
+    <div *ngIf="userLocation?.district && userLocation?.district?.name && userLocation?.district?.name?.length">
+        <span>{{'DISTRICT' | translate}}: </span>
+        <span class="bolder">{{userLocation.district.name}}</span>
+        <span
+            *ngIf="!(userLocation?.district && userLocation?.district?.name && userLocation?.district?.name?.length)"
+            class="lighter">{{'ADD_DISTRICT' | translate}}</span>
+    </div>
+    <div *ngIf="userLocation?.block && userLocation?.block?.name && userLocation?.block?.name?.length">
+        <span>{{'FRMELEMNTS_LBL_BLOCK' | translate}}: </span>
+        <span class="bolder">{{userLocation.block.name}}</span>
+        <span *ngIf="!(userLocation?.block && userLocation?.block?.name && userLocation?.block?.name?.length)"
+            class="lighter">{{'FRMELEMNTS_LBL_ADD_BLOCK' | translate}}</span>
+    </div>
+    <div *ngIf="userLocation?.cluster && userLocation?.cluster?.name && userLocation?.cluster?.name?.length">
+        <span>{{'FRMELEMNTS_LBL_CLUSTER' | translate}}: </span>
+        <span class="bolder">{{userLocation.cluster.name}}</span>
+        <span *ngIf="!(userLocation?.cluster && userLocation?.cluster?.name && userLocation?.cluster?.name?.length)"
+            class="lighter">{{'FRMELEMNTS_LBL_ADD_CLUSTER' | translate}}</span>
     </div>
     <div *ngIf="userLocation" class="location text-center">
         <div *ngIf="userLocation?.school && userLocation?.school?.name && userLocation?.school?.name?.length">
-            <span class="bolder">{{'FRMELEMNTS_LBL_SCHOOL' | translate}}: </span>
-            <span>{{userLocation.school.name}}</span>
+            <span>{{'FRMELEMNTS_LBL_SCHOOL' | translate}}: </span>
+            <span class="bolder">{{userLocation.school.name}}</span>
             <span *ngIf="!(userLocation?.school && userLocation?.school?.name && userLocation?.school?.name?.length)"
                 class="lighter">{{'FRMELEMNTS_LBL_ADD_SCHOOL' | translate}}</span>
-        </div>
-        <div *ngIf="userLocation?.cluster && userLocation?.cluster?.name && userLocation?.cluster?.name?.length">
-            <span class="bolder">{{'FRMELEMNTS_LBL_CLUSTER' | translate}}: </span>
-            <span>{{userLocation.cluster.name}}</span>
-            <span *ngIf="!(userLocation?.cluster && userLocation?.cluster?.name && userLocation?.cluster?.name?.length)"
-                class="lighter">{{'FRMELEMNTS_LBL_ADD_CLUSTER' | translate}}</span>
-        </div>
-        <div *ngIf="userLocation?.block && userLocation?.block?.name && userLocation?.block?.name?.length">
-            <span class="bolder">{{'FRMELEMNTS_LBL_BLOCK' | translate}}: </span>
-            <span>{{userLocation.block.name}}</span>
-            <span *ngIf="!(userLocation?.block && userLocation?.block?.name && userLocation?.block?.name?.length)"
-                class="lighter">{{'FRMELEMNTS_LBL_ADD_BLOCK' | translate}}</span>
-        </div>
-        <div *ngIf="userLocation?.district && userLocation?.district?.name && userLocation?.district?.name?.length">
-            <span class="bolder">{{'DISTRICT' | translate}}: </span>
-            <span>{{userLocation.district.name}}</span>
-            <span
-                *ngIf="!(userLocation?.district && userLocation?.district?.name && userLocation?.district?.name?.length)"
-                class="lighter">{{'ADD_DISTRICT' | translate}}</span>
-        </div>
-        <div *ngIf="userLocation?.state && userLocation?.state?.name && userLocation?.state?.name?.length">
-            <span class="bolder">{{'STATE' | translate}}: </span>
-            <span>{{userLocation.state.name}}</span>
-            <span *ngIf="!(userLocation?.state && userLocation?.state?.name && userLocation?.state?.name?.length)"
-                class="lighter">{{'ADD_STATE' | translate}}</span>
         </div>
         <div class="container MT10 MB10 edit-options">
             <ion-button shape="round" aria-label="Edit Role, Block, District, State"  (click)="onEditProfileClicked()"
@@ -108,23 +103,23 @@
     </div>
     <div class="framework-block" *ngIf="profile?.framework">
         <div class="container" *ngIf="profile?.framework?.board">
-            <div>{{'BOARD' | translate }}: </div>
-            <div class="bolder">{{profile?.framework?.board.join(', ') | aliased}} &lrm;</div>
+            <span>{{'BOARD' | translate }}: </span>
+            <span class="bolder">{{profile?.framework?.board.join(', ') | aliased}} &lrm;</span>
         </div>
         <div class="container" *ngIf="profile?.framework?.medium">
-            <div>{{'MEDIUM' | translate }}: </div>
-            <div class="bolder">{{profile?.framework?.medium.join(', ')}}</div>
+            <span>{{'MEDIUM' | translate }}: </span>
+            <span class="bolder">{{profile?.framework?.medium.join(', ')}}</span>
         </div>
         <div class="container" *ngIf="profile?.framework?.gradeLevel">
-            <div>{{'CLASSES' | translate }}: </div>
-            <div class="bolder">{{profile?.framework?.gradeLevel.join(', ')}}</div>
+            <span>{{'CLASSES' | translate }}: </span>
+            <span class="bolder">{{profile?.framework?.gradeLevel.join(', ')}}</span>
         </div>
         <div class="container" *ngIf="profile?.framework?.subject">
-            <div>{{'SUBJECTS' | translate }}: </div>
-            <div class="bolder">{{profile?.framework?.subject.join(', ')}}</div>
+            <span>{{'SUBJECTS' | translate }}: </span>
+            <span class="bolder">{{profile?.framework?.subject.join(', ')}}</span>
         </div>
         <div class="container">
-            <ion-button shape="round" aria-label="Edit Board, Medium, Classes, subjects" (click)="navigateToCategoriesEditPage()" class="custom-round">
+            <ion-button shape="round" aria-label="Edit Board, Medium, Classes, subjects" (click)="navigateToCategoriesEditPage()" class="custom-round ion-text-capitalize">
                 {{'EDIT' | translate }}
             </ion-button>
         </div>
@@ -137,39 +132,39 @@
     </div>
     <div class="contacts" *ngIf="!profile?.managedBy && (profile?.phone || profile?.email)">
         <div *ngIf="profile?.phone">
-            <div class="phone" (click)="editMobileNumber();">
+            <div class="phone" role="button" (click)="editMobileNumber();">
                 <span class="icon MR10 align-middle">
-                    <ion-icon name="call"></ion-icon>
+                    <ion-icon aria-hidden="true" name="call"></ion-icon>
                 </span>
                 <span class="value align-middle">+91 {{ profile?.phone }}</span>
             </div>
         </div>
         <div *ngIf="!profile?.phone">
-            <div class="phone light" (click)="editMobileNumber();" tabindex="0">
+            <div class="phone light" role="button"  (click)="editMobileNumber();" tabindex="0">
                 <span class="icon MR10 align-middle">
-                    <ion-icon name="call"></ion-icon>
+                    <ion-icon aria-hidden="true" name="call"></ion-icon>
                 </span>
                 <span class="value align-middle">{{'ADD_PHONE' | translate}}</span>
             </div>
         </div>
         <div *ngIf="profile?.email">
-            <div class="email " (click)="editEmail();" tabindex="0">
+            <div class="email " role="button" (click)="editEmail();" tabindex="0">
                 <span class="icon MR10 align-middle">
-                    <ion-icon name="mail"></ion-icon>
+                    <ion-icon aria-hidden="true" name="mail"></ion-icon>
                 </span>
                 <span class="value align-middle">{{ profile?.email }}</span>
             </div>
         </div>
         <div *ngIf="!profile?.email">
-            <div class="email light" (click)="editEmail();" tabindex="0">
+            <div class="email light" role="button" (click)="editEmail();" tabindex="0">
                 <span class="icon MR10 align-middle">
-                    <ion-icon name="mail"></ion-icon>
+                    <ion-icon aria-hidden="true" name="mail"></ion-icon>
                 </span>
                 <span class="value align-middle">{{'ADD_EMAIL' | translate}}</span>
             </div>
         </div>
         <div class="MT10" *ngIf=" ( profile?.recoveryEmail?.length > 0 ) || ( profile?.recoveryPhone?.length > 0 )">
-            <div class="email" (click)="editRecoveryId();">
+            <div class="email" role="button" (click)="editRecoveryId();">
                 <span class="icon MR10 align-middle">
                     <ion-icon src="assets/imgs/recovery_icon.svg"></ion-icon>
                 </span>
@@ -182,7 +177,7 @@
         </div>
         <div class="MT10" *ngIf="(!profile?.recoveryEmail && !profile?.recoveryPhone) || 
         ((profile?.recoveryEmail?.length === 0) && (profile?.recoveryPhone?.length === 0))">
-            <div class="email light" (click)="editRecoveryId();" tabindex="0">
+            <div class="email light" role="button" (click)="editRecoveryId();" tabindex="0">
                 <span class="icon MR10 align-middle">
                     <ion-icon src="assets/imgs/recovery_icon.svg"></ion-icon>
                 </span>
@@ -226,7 +221,7 @@
             </ion-button>
         </div>
     </div>
-    <div class="bottom-block">
+    <div class="bottom-block" *ngIf="mappedTrainingCertificates?.length > 0 || learnerPassbook?.length > 0 || contentCreatedByMe.length > 0">
         <div class="trainings" *ngIf="mappedTrainingCertificates?.length > 0">
             <div class="bolder heading f16">
                 <span>{{'FRMELEMNTS_LBL_MY_LEARNINGS' | translate}} ({{mappedTrainingCertificates?.length}})&lrm;</span>
@@ -234,8 +229,8 @@
                     (click)="getEnrolledCourses(true, true)"></ion-icon></span>
             </div>
             <div class="content">
-                <div class="flex-nowrap"
-                    *ngFor="let training of (mappedTrainingCertificates | slice : startLimit:myLearningLimit) |sortBy: 'status' : 'asc';">
+                <div *ngFor="let training of (mappedTrainingCertificates | slice : startLimit:myLearningLimit) |sortBy: 'status' : 'asc'; let i = index;"
+                    [ngClass]="{'flex-nowrap': i !== mappedTrainingCertificates.length-1, 'flex-nowrap-last': i == mappedTrainingCertificates.length-1}">
                     <div class="training-1">
                         <div class="fw sb__ellipsis sb__ellipsis--two" (click)="openEnrolledCourse(training)">
                             {{training.courseName}}
@@ -279,8 +274,8 @@
                 <span>{{'FRMELEMNTS_LBL_LEARNER_PASSBOOK' | translate}} ({{learnerPassbookCount}})&lrm;</span>
             </div>
             <div class="content">
-                <div class="flex-nowrap"
-                    *ngFor="let certificate of (learnerPassbook | slice : startLimit:learnerPassbookLimit) |sortBy: 'status' : 'asc';">
+                <div *ngFor="let certificate of (learnerPassbook | slice : startLimit:learnerPassbookLimit) |sortBy: 'status' : 'asc'; let i = index;"
+                    [ngClass]="{'flex-nowrap': i !== learnerPassbook.length-1, 'flex-nowrap-last': i == learnerPassbook.length-1}">
                     <div class="training-1">
                         <div class="fw sb__ellipsis sb__ellipsis--two" (click)="openEnrolledCourse(certificate)">
                             {{certificate.courseName}}
@@ -323,7 +318,7 @@
                     <div class="flex-container" *ngIf="contentCreatedByMe  && isLoggedInUser">
                         <ion-card *ngFor="let courseItem of contentCreatedByMe; let i=index"
                             (click)="navigateToDetailPage(courseItem, layoutPopular, i);"
-                            style="min-width: 84%;height: 165px;">
+                            style="min-width: 84%;height: 10.313rem;">
                             <ion-card-content>
                                 <ion-row class="top">
                                     <ion-col size="3" class="img-container">

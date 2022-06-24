@@ -3,7 +3,7 @@ import { ModalController, AlertController, PopoverController, Platform } from '@
 import { TranslateService } from '@ngx-translate/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { CategorySelectComponent } from '../category-select/category-select.component';
-import { AppHeaderService } from '@app/services';
+import { AppHeaderService, FormAndFrameworkUtilService } from '@app/services';
 import { Subscription } from 'rxjs';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -11,6 +11,8 @@ import { DbService, LocalStorageService, statusType, ToastService, UtilsService 
 import { localStorageConstants } from '../../core/constants/localStorageConstants';
 import { RouterLinks } from '@app/app/app.constant';
 import { CreateTaskComponent } from '../../shared/components/create-task/create-task.component';
+import { FieldConfig } from '@app/app/components/common-forms/field-config';
+import { FormConstants } from '@app/app/form.constants';
 
 @Component({
   selector: 'app-create-project',
@@ -27,7 +29,7 @@ export class CreateProjectPage implements OnInit {
   projectId;
   createProjectAlert;
   hasAcceptedTAndC: boolean;
-  project;
+  project: any = {};
   projectCopy;
   parameters;
   button = 'FRMELEMENTS_BTN_CREATE_PROJECT';
@@ -60,7 +62,8 @@ export class CreateProjectPage implements OnInit {
     private toast: ToastService,
     private utilsService: UtilsService,
     private ngZone: NgZone,
-    private popoverCtrl: PopoverController
+    private popoverCtrl: PopoverController,
+    private formAndFrameworkUtilService: FormAndFrameworkUtilService,
   ) {
     route.queryParams.subscribe((parameters) => {
       this.hasAcceptedTAndC = parameters.hasAcceptedTAndC == 'false' ? false : true;
@@ -68,7 +71,6 @@ export class CreateProjectPage implements OnInit {
         this.parameters = parameters;
         this.showTask = false;
         this.button = 'FRMELEMNTS_BTN_SAVE_EDITS';
-        this.getProjectFromLocal();
       } else {
         this.showTask = true;
       }
@@ -110,32 +112,37 @@ export class CreateProjectPage implements OnInit {
   }
 
   getProjectFromLocal() {
-    this.db.query({ _id: this.parameters.projectId }).then(
-      (success) => {
-        this.project = success.docs.length ? success.docs[0] : {};
-        this.projectCopy = JSON.parse(JSON.stringify(this.project));
-        if (this.project.categories.length) {
-          this.project.categories.forEach((element) => {
-            element.isChecked = true;
-          });
-          this.selectedCategories = this.project.categories;
+    if (this.parameters?.projectId) {
+      this.db.query({ _id: this.parameters.projectId }).then(
+        (success) => {
+          this.project = success.docs.length ? success.docs[0] : {};
+          this.projectCopy = JSON.parse(JSON.stringify(this.project));
+          if (this.project.categories.length) {
+            this.project.categories.forEach((element) => {
+              element.isChecked = true;
+            });
+            this.selectedCategories = this.project.categories;
+          }
+          this.prepareForm();
+        },
+        (error) => {
+          this.prepareForm();
         }
-      },
-      (error) => { }
-    );
+      );
+    } else {
+      this.prepareForm();
+    }
   }
 
-  getForm() {
-    this.storage.getLocalStorage(localStorageConstants.PROJECT_META_FORM).then((projectData) => {
-      this.projectFormData = projectData;
-      this.storage.getLocalStorage(localStorageConstants.TASK_META_FORM).then((taskData) => {
-        let taskForm = {
-          taskData,
-        };
-        this.projectFormData.push(taskForm);
-        this.prepareForm();
-      });
-    });
+  async getForm() {
+    const createProjectMeta: FieldConfig<any>[] = await this.formAndFrameworkUtilService.getFormFields(
+      FormConstants.PROJECT_CREATE_META
+    );
+    if (createProjectMeta.length) {
+      this.projectFormData = createProjectMeta;
+      this.storage.setLocalStorage(localStorageConstants.PROJECT_META_FORM, createProjectMeta);
+      this.getProjectFromLocal();
+    }
   }
   public prepareForm() {
     const controls = {};
@@ -151,48 +158,73 @@ export class CreateProjectPage implements OnInit {
           }
         }
       } else {
-        res.taskData.forEach((element) => {
-          if (element.validation) {
-            if (element.validation.required) {
-              (element.validation.name = 'required'),  validationsArray.push(Validators.required);
+        if (res.taskData && res.taskData.length) {
+          res.taskData.forEach((element) => {
+            if (element.validation) {
+              if (element.validation.required) {
+                (element.validation.name = 'required'), validationsArray.push(Validators.required);
+              }
+              controls[element.field] = new FormControl('', validationsArray);
             }
-            controls[element.field] = new FormControl('', validationsArray);
-          }
-        });
+          });
+        }
       }
     });
     this.projectForm = this.fb.group(controls);
   }
   async confirmToClose() {
     let text;
-    this.translate
+    let translateText ={
+      header: 'FRMELEMNTS_LBL_DISCARD_PROJECT',
+      message:'FRMELEMNTS_MSG_DISCARD_PROJECT',
+      yes:'YES',
+      no:'NO'
+    }
+    if(this.project._id){
+      translateText ={
+        header: 'FRMELEMNTS_LBL_DISCARD_EDIT_PROJECT',
+        message:'FRMELEMNTS_MSG_DISCARD_EDIT_PROJECT',
+        yes:'YES',
+        no:'NO'
+      }
+    }
+      this.translate
       .get([
-        'FRMELEMNTS_LBL_DISCARD_PROJECT',
-        'FRMELEMNTS_MSG_DISCARD_PROJECT',
-        'YES',
-        'NO',
+        translateText.header,
+        translateText.message,
+        translateText.yes,
+        translateText.no,
       ])
       .subscribe((data) => {
         text = data;
       });
     const alertPopup = await this.alertPopup.create({
-      cssClass:'central-alert',
-      header: text['FRMELEMNTS_LBL_DISCARD_PROJECT'],
-      message: text['FRMELEMNTS_MSG_DISCARD_PROJECT'],
+      cssClass: 'central-alert',
+      header: text[translateText.header],
+      message: text[translateText.message],
       buttons: [
         {
-          text: text['YES'],
+          text: text[translateText.yes],
           role: 'cancel',
           cssClass: 'text-transform-free',
           handler: (blah) => {
-            this.location.back();
-            this.backButtonFunc.unsubscribe();
+            if(this.project._id){
+              this.next();
+            }else{
+              this.location.back();
+              this.backButtonFunc.unsubscribe();
+            }
           },
         },
         {
-          text: text['NO'],
+          text: text[translateText.no],
           cssClass: 'text-transform-free',
-          handler: () => { },
+          handler: () => { 
+            if(this.project._id){
+              this.location.back();
+              this.backButtonFunc.unsubscribe();
+            }
+          },
         },
       ],
     });
@@ -344,8 +376,8 @@ export class CreateProjectPage implements OnInit {
     this.project.categories = data.categories;
     if (JSON.stringify(this.project) !== JSON.stringify(this.projectCopy)) {
       this.project.isEdit = true;
-      this.project.status =  this.project.status ? this.project.status : statusType.notStarted;
-      this.project.status =  this.project.status == statusType.notStarted ? statusType.inProgress:this.project.status;
+      this.project.status = this.project.status ? this.project.status : statusType.notStarted;
+      this.project.status = this.project.status == statusType.notStarted ? statusType.inProgress : this.project.status;
     }
     this.db
       .update(this.project)

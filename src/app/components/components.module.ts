@@ -78,6 +78,8 @@ import { SbPreferencePopupComponent } from './popups/sb-preferences-popup/sb-pre
 import { QrScannerIOSComponent } from './qr-scanner-ios/qr-scanner-ios.component';
 import { ContentShareHandlerService } from '@app/services';
 import { ShowCertificateComponent } from './show-certificate-component/show-certificate-component.component';
+import { CertificateVerificationPopoverComponent } from './popups/certificate-verification/certificate-verification-popup.component';
+import { DownloadTranscriptPopupComponent } from './popups/download-transcript-popup/download-transcript-popup.component';
 @NgModule({
   declarations: [
     ApplicationHeaderComponent,
@@ -142,7 +144,9 @@ import { ShowCertificateComponent } from './show-certificate-component/show-cert
     RelevantContentCardComponent,
     SbPreferencePopupComponent,
     QrScannerIOSComponent,
-    ShowCertificateComponent
+    ShowCertificateComponent,
+    CertificateVerificationPopoverComponent,
+    DownloadTranscriptPopupComponent
   ],
   imports: [
     CommonModule,
@@ -204,7 +208,9 @@ import { ShowCertificateComponent } from './show-certificate-component/show-cert
     YearOfBirthPopupComponent,
     ContentViewerComponent,
     SbPreferencePopupComponent,
-    QrScannerIOSComponent
+    QrScannerIOSComponent,
+    CertificateVerificationPopoverComponent,
+    DownloadTranscriptPopupComponent
   ],
   exports: [
     ApplicationHeaderComponent,
@@ -267,7 +273,9 @@ import { ShowCertificateComponent } from './show-certificate-component/show-cert
     RelevantContentCardComponent,
     SbPreferencePopupComponent,
     QrScannerIOSComponent,
-    ShowCertificateComponent
+    ShowCertificateComponent,
+    CertificateVerificationPopoverComponent,
+    DownloadTranscriptPopupComponent
   ],
   providers: [FileSizePipe, FilterPipe, Keyboard, ScreenOrientation, ContentShareHandlerService]
 })

@@ -1,0 +1,70 @@
+import { Injectable } from '@angular/core';
+import { FormRequest } from 'sunbird-sdk';
+import { FormAndFrameworkUtilService } from '@app/services';
+import { FormConstants } from '@app/app/form.constants';
+
+@Injectable({
+    providedIn: 'root'
+})
+
+export class SearchFilterService {
+    private facetFilterFormConfig
+    constructor(
+        private formAndFrameworkUtilService: FormAndFrameworkUtilService
+    ) {}
+
+    async getFacetFormAPIConfig() {
+        if (!this.facetFilterFormConfig) {
+            await this.fetchFacetFilterFormConfig()
+        }
+        return this.facetFilterFormConfig;
+    }
+
+    async fetchFacetFilterFormConfig(subType?) {
+        FormConstants.FACET_FILTERS['subType'] = subType || 'default';
+        try {
+            this.facetFilterFormConfig = await this.formAndFrameworkUtilService
+               .getFormFields({...FormConstants.FACET_FILTERS, subType: subType || 'default'});
+        } catch {
+            this.facetFilterFormConfig = await this.formAndFrameworkUtilService.getFormFields(FormConstants.FACET_FILTERS);
+        }
+        return this.facetFilterFormConfig;
+    }
+
+    async reformFilterValues(facetFilters, formAPIFacets = this.facetFilterFormConfig) {
+        if (!formAPIFacets) {
+            await this.getFacetFormAPIConfig();
+            formAPIFacets = this.facetFilterFormConfig
+        }
+
+        if (formAPIFacets && formAPIFacets.length) {
+            facetFilters = facetFilters.map(facet => {
+                for (let count = 0; count < formAPIFacets.length; count++) {
+                    if (facet.name === formAPIFacets[count].code) {
+                        facet = this.compareAndAssignValue(facet, formAPIFacets[count]);
+                        break;
+                    }
+                }
+                return facet;
+            });
+        }
+
+        return facetFilters
+    }
+
+    private compareAndAssignValue(initialFacet, replaceableFacet) {
+        if (replaceableFacet.values && replaceableFacet.values.length) {
+            const initialFacetValues = JSON.parse(JSON.stringify(initialFacet.values));
+            initialFacet.values = replaceableFacet.values;
+
+            for (let count = 0; count < initialFacet.values.length; count++) {
+                const facteVal = initialFacetValues.find(val => val.name === initialFacet.values[count].name);
+                if(facteVal){
+                    initialFacet.values[count].apply = facteVal.apply || false;
+                }
+            }
+        }
+        return initialFacet;
+    }
+
+}

@@ -2,10 +2,8 @@ import { tap } from 'rxjs/operators';
 import { Subscription, combineLatest, Observable } from 'rxjs';
 import { Component, Inject, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { IonSelect, Platform } from '@ionic/angular';
-import { Events } from '@app/util/events';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { initTabs, LOGIN_TEACHER_TABS } from '@app/app/module.service';
 import {
   FrameworkService,
   FrameworkUtilService,
@@ -25,17 +23,14 @@ import {
 import { CommonUtilService } from '@app/services/common-util.service';
 import { AppGlobalService } from '@app/services/app-global-service.service';
 import { AppHeaderService } from '@app/services/app-header.service';
-import { FormAndFrameworkUtilService } from '@app/services/formandframeworkutil.service';
-import { ContainerService } from '@app/services/container.services';
-import { PreferenceKey, ProfileConstants, RouterLinks } from '@app/app/app.constant';
-import { Router, NavigationExtras } from '@angular/router';
+import { PreferenceKey, ProfileConstants } from '@app/app/app.constant';
+import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { Environment, ActivePageService } from '@app/services';
-import { ExternalIdVerificationService } from '@app/services/externalid-verification.service';
-import { TncUpdateHandlerService } from '@app/services/handlers/tnc-update-handler.service';
 import { SbProgressLoader } from '@app/services/sb-progress-loader.service';
 import { ProfileHandler } from '@app/services/profile-handler';
 import { SegmentationTagService, TagPrefixConstants } from '@app/services/segmentation-tag/segmentation-tag.service';
+import { CategoriesEditService } from './categories-edit.service';
 
 
 @Component({
@@ -80,6 +75,8 @@ export class CategoriesEditPage implements OnInit, OnDestroy {
   public supportedProfileAttributes: { [key: string]: string } = {};
   userType: string;
   shouldUpdatePreference: boolean;
+  noOfStepsToCourseToc = 0;
+  guestUserProfile: any;
 
   /* Custom styles for the select box popup */
   boardOptions = {
@@ -130,19 +127,15 @@ export class CategoriesEditPage implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private translate: TranslateService,
     private appGlobalService: AppGlobalService,
-    private events: Events,
-    private container: ContainerService,
-    private formAndFrameworkUtilService: FormAndFrameworkUtilService,
     private headerService: AppHeaderService,
     private router: Router,
     private location: Location,
     private platform: Platform,
     private activePageService: ActivePageService,
-    private externalIdVerificationService: ExternalIdVerificationService,
-    private tncUpdateHandlerService: TncUpdateHandlerService,
     private sbProgressLoader: SbProgressLoader,
     private profileHandler: ProfileHandler,
-    private segmentationTagService: SegmentationTagService
+    private segmentationTagService: SegmentationTagService,
+    private categoriesEditService: CategoriesEditService
 
   ) {
     this.appGlobalService.closeSigninOnboardingLoader();
@@ -152,6 +145,7 @@ export class CategoriesEditPage implements OnInit, OnDestroy {
       this.hasFilledLocation = extrasState.hasFilledLocation;
       this.showOnlyMandatoryFields = extrasState.showOnlyMandatoryFields;
       this.isRootPage = Boolean(extrasState.isRootPage);
+      this.noOfStepsToCourseToc = extrasState.noOfStepsToCourseToc;
       if (extrasState.profile) {
         this.profile = extrasState.profile;
       }
@@ -176,6 +170,7 @@ export class CategoriesEditPage implements OnInit, OnDestroy {
    * Ionic life cycle event - Fires every time page visits
    */
   ionViewWillEnter() {
+    this.setDefaultBMG();
     this.initializeLoader();
     if (this.appGlobalService.isUserLoggedIn()) {
       this.getLoggedInFrameworkCategory();
@@ -243,7 +238,9 @@ export class CategoriesEditPage implements OnInit, OnDestroy {
           return;
         }
         this.syllabusList = frameworks.map(r => ({ name: r.name, code: r.identifier }));
-        this.syllabusControl.patchValue([this.profile.syllabus && this.profile.syllabus[0]] || []);
+        const syllabus = (this.profile.syllabus && this.profile.syllabus[0]) ||
+          (this.guestUserProfile.syllabus && this.guestUserProfile.syllabus[0]);
+        this.syllabusControl.patchValue([syllabus] || []);
         await this.loader.dismiss();
       });
   }
@@ -294,7 +291,7 @@ export class CategoriesEditPage implements OnInit, OnDestroy {
           this.mediumList = (await this.frameworkUtilService.getFrameworkCategoryTerms(nextCategoryTermsRequet).toPromise())
             .map(t => ({ name: t.name, code: t.code }));
           if (!this.mediumControl.value) {
-            this.mediumControl.patchValue(this.profile.medium || []);
+            this.mediumControl.patchValue((this.profile.medium.length ?  this.profile.medium : this.guestUserProfile.medium) || []);
           } else {
             this.mediumControl.patchValue([]);
           }
@@ -328,7 +325,7 @@ export class CategoriesEditPage implements OnInit, OnDestroy {
           this.gradeList = (await this.frameworkUtilService.getFrameworkCategoryTerms(nextCategoryTermsRequet).toPromise())
             .map(t => ({ name: t.name, code: t.code }));
           if (!this.gradeControl.value) {
-            this.gradeControl.patchValue(this.profile.grade || []);
+            this.gradeControl.patchValue((this.profile.grade.length ?  this.profile.grade : this.guestUserProfile.grade) || []);
           } else {
             this.gradeControl.patchValue([]);
           }
@@ -357,7 +354,7 @@ export class CategoriesEditPage implements OnInit, OnDestroy {
           this.subjectList = (await this.frameworkUtilService.getFrameworkCategoryTerms(nextCategoryTermsRequet).toPromise())
             .map(t => ({ name: t.name, code: t.code }));
           if (!this.subjectControl.value) {
-            this.subjectControl.patchValue(this.profile.subject || []);
+            this.subjectControl.patchValue((this.profile.subject.length ?  this.profile.subject : this.guestUserProfile.subject)  || []);
           } else {
             this.subjectControl.patchValue([]);
           }
@@ -463,63 +460,9 @@ export class CategoriesEditPage implements OnInit, OnDestroy {
     this.profileService.updateServerProfile(req).toPromise()
       .then(async () => {
         await this.loader.dismiss();
-        this.commonUtilService.showToast(this.commonUtilService.translateMessage('PROFILE_UPDATE_SUCCESS'));
         this.disableSubmitButton = true;
-        this.events.publish('loggedInProfile:update', req.framework);
-        const isSSOUser = await this.tncUpdateHandlerService.isSSOUser(this.profile);
-        await this.refreshSegmentTags();
-        if (this.showOnlyMandatoryFields || this.shouldUpdatePreference) {
-          const reqObj: ServerProfileDetailsRequest = {
-            userId: this.profile.uid,
-            requiredFields: ProfileConstants.REQUIRED_FIELDS,
-            from: CachedItemRequestSourceFrom.SERVER
-          };
-          this.profileService.getServerProfilesDetails(reqObj).toPromise()
-            .then(updatedProfile => {
-               this.formAndFrameworkUtilService.updateLoggedInUser(updatedProfile, this.profile)
-                .then(async () => {
-                  if (this.shouldUpdatePreference) {
-                    this.location.back();
-                  } else {
-                    initTabs(this.container, LOGIN_TEACHER_TABS);
-                    if (this.hasFilledLocation || isSSOUser) {
-                      if (!isSSOUser) {
-                        this.appGlobalService.showYearOfBirthPopup(updatedProfile);
-                      }
-                      this.router.navigate([RouterLinks.TABS]);
-                      this.events.publish('update_header');
-                      this.externalIdVerificationService.showExternalIdVerificationPopup();
-                    } else {
-                      const navigationExtras: NavigationExtras = {
-                        state: {
-                          isShowBackButton: false
-                        }
-                      };
-                      this.router.navigate([RouterLinks.DISTRICT_MAPPING], navigationExtras);
-                    }
-                  }
-                });
-            }).catch(() => {
-              initTabs(this.container, LOGIN_TEACHER_TABS);
-              if (this.hasFilledLocation) {
-                if (!isSSOUser) {
-                  this.appGlobalService.showYearOfBirthPopup(this.profile.serverProfile);
-                }
-                this.router.navigate([RouterLinks.TABS]);
-                this.events.publish('update_header');
-                this.externalIdVerificationService.showExternalIdVerificationPopup();
-              } else {
-                const navigationExtras: NavigationExtras = {
-                  state: {
-                    isShowBackButton: false
-                  }
-                };
-                this.router.navigate([RouterLinks.DISTRICT_MAPPING], navigationExtras);
-              }
-            });
-        } else {
-          this.location.back();
-        }
+        await this.categoriesEditService.updateServerProfile(req, this.profile, this.showOnlyMandatoryFields,
+          this.shouldUpdatePreference, this.hasFilledLocation, this.noOfStepsToCourseToc);
       }).catch(async (error) => {
         await this.loader.dismiss();
         this.commonUtilService.showToast(this.commonUtilService.translateMessage('PROFILE_UPDATE_FAILED'));
@@ -578,13 +521,15 @@ export class CategoriesEditPage implements OnInit, OnDestroy {
       if (boardCategory) {
         this.syllabusList = activeChannelSuggestedFrameworkList.map(f => ({ name: f.name, code: f.identifier }));
         this.isBoardAvailable = true;
-        this.syllabusControl.patchValue([this.profile.syllabus && this.profile.syllabus[0]] || []);
+        const syllabus = (this.profile.syllabus && this.profile.syllabus[0]) ||
+         (this.guestUserProfile.syllabus && this.guestUserProfile.syllabus[0]);
+        this.syllabusControl.patchValue([syllabus] || []);
       } else {
         await this.getFrameworkData(this.frameworkId);
         this.categories.unshift([]);
         this.isBoardAvailable = false;
         this.mediumList = mediumCategory.terms;
-        this.mediumControl.patchValue(this.profile.medium || []);
+        this.mediumControl.patchValue((this.profile.medium.length ?  this.profile.medium : this.guestUserProfile.medium) || []);
       }
     } catch (err) {
       if (!this.commonUtilService.networkInfo.isNetworkAvailable) {
@@ -622,5 +567,11 @@ export class CategoriesEditPage implements OnInit, OnDestroy {
 
   goBack() {
     this.location.back();
+  }
+
+  async setDefaultBMG() {
+    await this.commonUtilService.getGuestUserConfig().then((profile) => {
+      this.guestUserProfile = profile;
+    });
   }
 }

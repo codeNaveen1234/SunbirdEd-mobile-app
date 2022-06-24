@@ -2,7 +2,7 @@
 	<div class="">
 		<form [formGroup]="profileSettingsForm" class="ps-container">
 			<div  role="button" aria-label="back" [ngClass]="{ 'back-btn-container': platform.is('android'), 'back-btn-container-ios': platform.is('ios')}">
-				<img src="assets/imgs/ic_back_black.svg" *ngIf="!hideBackButton"
+				<img src="assets/imgs/ic_back_black.svg" *ngIf="!hideBackButton && !(showQRScanner && isInitialScreen)"
 					 (click)="handleBackButton(true)"
 					 class="top-back-button" alt="back">
 			</div>
@@ -101,6 +101,6 @@
 	<button class="sb-btn sb-btn-md sb-btn-primary PR35 W100 ellipsis btn-block ion-text-uppercase"
 		[style.background-color]="btnColor" (click)="onSubmitAttempt()">
 		{{ 'CONTINUE' | translate }}
-		<img class="arrow-icon" src="assets/imgs/ic_back.svg" [class.animate]="profileSettingsForm.valid" name="arrow-round-forward" alt="">
+		<img class="arrow-icon" src="assets/imgs/ic_back.svg" [class.animate]="profileSettingsForm.valid" alt="">
 	</button>
 </div>

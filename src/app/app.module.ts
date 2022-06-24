@@ -83,7 +83,7 @@ import { SbSearchFilterModule } from 'common-form-elements';
 import {LoginNavigationHandlerService} from '@app/services/login-navigation-handler.service';
 import { StoragePermissionHandlerService } from '@app/services/storage-permission/storage-permission-handler.service';
 import { TranslateJsonPipe } from '@app/pipes/translate-json/translate-json';
-
+import { OnboardingConfigurationService } from '@app/services/onboarding-configuration.service';
 // AoT requires an exported function for factories
 export function translateHttpLoaderFactory(httpClient: HttpClient) {
   return new TranslateHttpLoader(httpClient, './assets/i18n/', '.json');
@@ -187,6 +187,10 @@ export const debuggingService = () => {
 
 export const notificationServiceV2 = () => {
   return SunbirdSdk.instance.notificationServiceV2;
+};
+
+export const certificateService = () => {
+  return SunbirdSdk.instance.certificateService;
 };
 
 export function sdkDriverFactory(): any {
@@ -295,7 +299,10 @@ export function sdkDriverFactory(): any {
   },{
     provide: 'NOTIFICATION_SERVICE_V2',
     useFactory: notificationServiceV2
-  },];
+  },{
+    provide: 'CERTIFICATE_SERVICE',
+    useFactory: certificateService
+  }];
 }
 
 export const sunbirdSdkServicesProvidersFactory: () => Provider[] = sdkDriverFactory;
@@ -349,9 +356,9 @@ export const sunbirdSdkFactory =
           apiPath: '/api/v3/device'
         },
         contentServiceConfig: {
-          apiPath: '/api/content/v1',
+          apiPath: '/api/content/v2',
           searchApiPath: '/api/content/v1',
-          contentHeirarchyAPIPath: '/api/course/v1',
+          contentHeirarchyAPIPath: '/api/collection/v1',
           questionSetReadApiPath: '/api/questionset/v1',
           questionReadApiPath: '/api/question/v1/'
         },
@@ -373,11 +380,9 @@ export const sunbirdSdkFactory =
         profileServiceConfig: {
           profileApiPath: '/api/user/v1',
           profileApiPath_V2: '/api/user/v2',
-          profileApiPath_V3: '/api/user/v3',
-          profileApiPath_V4: '/api/user/v4',
           profileApiPath_V5: '/api/user/v5',
           tenantApiPath: '/v1/tenant',
-          otpApiPath: '/api/otp/v1',
+          otpApiPath: '/api/otp/v2',
           searchLocationApiPath: '/api/data/v1',
           locationDirPath: '/data/location'
         },
@@ -385,7 +390,7 @@ export const sunbirdSdkFactory =
           apiPath: '/api/data/v1',
         },
         appConfig: {
-          maxCompatibilityLevel: 4,
+          maxCompatibilityLevel: 5,
           minCompatibilityLevel: 1
         },
         systemSettingsConfig: {
@@ -399,6 +404,11 @@ export const sunbirdSdkFactory =
           telemetryLogMinAllowedOffset: 86400000
         },
         sharedPreferencesConfig: {
+        },
+        certificateServiceConfig: {
+          apiPath: '/api/certreg/v2',
+          apiPathLegacy: '/api/certreg/v1',
+          rcApiPath: '/api/rc/${schemaName}/v1',
         },
         playerConfig: {
           showEndPage: false,
@@ -524,6 +534,7 @@ declare const sbutility;
     LoginNavigationHandlerService,
     GooglePlus,
     StoragePermissionHandlerService,
+    OnboardingConfigurationService,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     ...sunbirdSdkServicesProvidersFactory(),
     { provide: ErrorHandler, useClass: CrashAnalyticsErrorLogger },

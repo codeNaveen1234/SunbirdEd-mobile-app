@@ -43,7 +43,10 @@ import {
   ProfileType,
   Batch,
   GetLearnerCerificateRequest,
-  GenerateOtpRequest
+  GenerateOtpRequest,
+  CertificateService,
+  CSGetLearnerCerificateRequest,
+  CsLearnerCertificate
 } from 'sunbird-sdk';
 import { Environment, InteractSubtype, InteractType, PageId, ID } from '@app/services/telemetry-constants';
 import { Router } from '@angular/router';
@@ -72,6 +75,7 @@ import { CsPrimaryCategory } from '@project-sunbird/client-services/services/con
 import { FormConstants } from '../form.constants';
 import { ProfileHandler } from '@app/services/profile-handler';
 import { SegmentationTagService, TagPrefixConstants } from '@app/services/segmentation-tag/segmentation-tag.service';
+import { OrganizationSearchCriteria } from '@project-sunbird/sunbird-sdk';
 
 @Component({
   selector: 'app-profile',
@@ -146,6 +150,7 @@ export class ProfilePage implements OnInit {
     @Inject('COURSE_SERVICE') private courseService: CourseService,
     @Inject('FORM_SERVICE') private formService: FormService,
     @Inject('FRAMEWORK_SERVICE') private frameworkService: FrameworkService,
+    @Inject('CERTIFICATE_SERVICE') private certificateService: CertificateService,
     private zone: NgZone,
     private router: Router,
     private popoverCtrl: PopoverController,
@@ -318,7 +323,8 @@ export class ProfilePage implements OnInit {
                     && that.profile.profileUserType.type === ProfileType.OTHER.toUpperCase())) ? '' : that.profile.profileUserType.type;
                 that.profile['persona'] =  await that.profileHandler.getPersonaConfig(role.toLowerCase());
                 that.userLocation = that.commonUtilService.getUserLocation(that.profile);
-                that.profile['subPersona'] = await that.profileHandler.getSubPersona(that.profile.profileUserType.subType,
+                
+                that.profile['subPersona'] = await that.profileHandler.getSubPersona(this.profile,
                       role.toLowerCase(), this.userLocation);
                 that.profileService.getActiveSessionProfile({ requiredFields: ProfileConstants.REQUIRED_FIELDS }).toPromise()
                   .then((activeProfile) => {
@@ -455,7 +461,7 @@ export class ProfilePage implements OnInit {
     this.courseService.getEnrolledCourses(option).toPromise()
       .then(async (res: Course[]) => {
         if (res.length) {
-          this.enrolledCourseList = res;
+          this.enrolledCourseList = res.sort((a, b) => (a.enrolledDate > b.enrolledDate ? -1 : 1));
           this.mappedTrainingCertificates = this.mapTrainingsToCertificates(res);
         }
         refreshCourseList ? await loader.dismiss() : false;
@@ -506,30 +512,40 @@ export class ProfilePage implements OnInit {
     try {
       const request: GetLearnerCerificateRequest = { userId: this.profile.userId || this.profile.id };
       this.learnerPassbookCount ? request.size = this.learnerPassbookCount : null;
-      await this.courseService.getLearnerCertificates(request).toPromise().then(response => {
-        this.learnerPassbookCount = response.count;
+      const getCertsReq: CSGetLearnerCerificateRequest = {
+        userId: this.profile.userId || this.profile.id,
+        schemaName: 'certificate',
+        size: this.learnerPassbookCount? this.learnerPassbookCount : null
+      };
 
-        this.learnerPassbook = response.content.filter((learnerCertificate: any) => (learnerCertificate &&
-          learnerCertificate._source && learnerCertificate._source.data && learnerCertificate._source.data.badge))
-          .map((learnerCertificate: any) => {
+      await this.certificateService.getCertificates(getCertsReq).toPromise().then(response => {
+        this.learnerPassbookCount = response.certRegCount + response.rcCount || null;
+
+        this.learnerPassbook = response.certificates
+          .map((learnerCertificate: CsLearnerCertificate) => {
             const oneCert: any = {
-              issuingAuthority: learnerCertificate._source.data.badge.issuer.name,
-              issuedOn: learnerCertificate._source.data.issuedOn,
-              courseName: learnerCertificate._source.data.badge.name,
-              courseId: learnerCertificate._source.related.courseId || learnerCertificate._source.related.Id
+              issuingAuthority: learnerCertificate.issuerName,
+              issuedOn: learnerCertificate.issuedOn,
+              courseName: learnerCertificate.trainingName,
+              courseId: learnerCertificate.courseId,
             };
-            if (learnerCertificate._source.pdfUrl) {
+            if (learnerCertificate.pdfUrl) {
               oneCert.certificate = {
-                url: learnerCertificate._source.pdfUrl || undefined,
-                id: learnerCertificate._id || undefined,
-                issuedOn: learnerCertificate._source.data.issuedOn,
-                name: learnerCertificate._source.data.badge.issuer.name
+                url: learnerCertificate.pdfUrl || undefined,
+                id: learnerCertificate.id || undefined,
+                identifier: learnerCertificate.id,
+                issuedOn: learnerCertificate.issuedOn,
+                name: learnerCertificate.issuerName,
+                type: learnerCertificate.type,
+                templateUrl: learnerCertificate.templateUrl
               };
             } else {
               oneCert.issuedCertificate = {
-                identifier: learnerCertificate._id,
-                name: learnerCertificate._source.data.badge.issuer.name,
-                issuedOn: learnerCertificate._source.data.issuedOn
+                identifier: learnerCertificate.id,
+                name: learnerCertificate.issuerName,
+                issuedOn: learnerCertificate.issuedOn,
+                type: learnerCertificate.type,
+                templateUrl: learnerCertificate.templateUrl
               };
             }
             return oneCert;
@@ -569,10 +585,13 @@ export class ProfilePage implements OnInit {
               return;
             }
           }
-
-          this.router.navigate([`/${RouterLinks.PROFILE}/${RouterLinks.CERTIFICATE_VIEW}`], {
-            state: { request }
-          });
+          if (this.platform.is('ios')) {
+            (window as any).cordova.InAppBrowser.open(request.certificate['templateUrl'], '_blank');
+          } else {
+            this.router.navigate([`/${RouterLinks.PROFILE}/${RouterLinks.CERTIFICATE_VIEW}`], {
+              state: { request }
+            });
+          }
         } else {
           if (!this.commonUtilService.networkInfo.isNetworkAvailable) {
             this.commonUtilService.showToast('OFFLINE_CERTIFICATE_MESSAGE', false, '', 3000, 'top');
@@ -753,7 +772,7 @@ export class ProfilePage implements OnInit {
     .then((_) => this.showEditContactPopup(componentProps))
     .catch(e => {
       if (e && e.response && e.response.body && e.response.body.params && e.response.body.params.err &&
-        e.response.body.params.err === 'ERROR_RATE_LIMIT_EXCEEDED') {
+        e.response.body.params.err === 'UOS_OTPCRT0059') {
         this.commonUtilService.showToast('ERROR_OTP_LIMIT_EXCEEDED');
       } else if (e.message !== 'CANCEL') {
         this.commonUtilService.showToast('SOMETHING_WENT_WRONG');
@@ -1100,6 +1119,21 @@ export class ProfilePage implements OnInit {
       const tenantPersonaList = await this.formAndFrameworkUtilService.getFormFields(
         FormConstants.TENANT_PERSONAINFO, this.profile.rootOrg.rootOrgId);
       const tenantConfig: any = tenantPersonaList.find(config => config.code === 'tenant');
+      const searchOrganizationReq: OrganizationSearchCriteria<{ orgName: string, rootOrgId: string}> = {
+        filters: {
+            isTenant: true
+        },
+        fields: ['orgName', 'rootOrgId']
+    };
+      const organisations = (await this.frameworkService.searchOrganization(searchOrganizationReq).toPromise()).content;
+      let index = 0;
+      const organisationList = organisations.map((org) => ({
+        value: org.rootOrgId,
+        label: org.orgName,
+        index: index++
+      }));
+      index = 0;
+      tenantConfig.templateOptions.options = organisationList;
       const tenantDetails = tenantConfig.templateOptions && tenantConfig.templateOptions.options &&
         tenantConfig.templateOptions.options.find(tenant => tenant.value === this.selfDeclarationInfo.orgId);
 
@@ -1129,7 +1163,7 @@ export class ProfilePage implements OnInit {
     const translatedMsg = this.commonUtilService.translateMessage('SHARE_USERNAME', {
       app_name: this.appName,
       user_name: fullName,
-      diksha_id: this.profile.userName
+      sunbird_id: this.profile.userName
     });
     this.socialSharing.share(translatedMsg);
   }

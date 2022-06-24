@@ -1,6 +1,7 @@
+import { AppOrientation } from './../../app.constant';
 import {
-  ChangeDetectorRef, Component, EventEmitter,
-  Inject, Input, NgZone, OnDestroy, OnInit, Output
+  ChangeDetectorRef, Component, ElementRef, EventEmitter,
+  Inject, Input, NgZone, OnDestroy, OnInit, Output, Renderer2, ViewChild
 } from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
 import { ApplicationHeaderKebabMenuComponent } from '@app/app/components/application-header/application-header-kebab-menu.component';
@@ -16,7 +17,7 @@ import {
   CorrelationData, DownloadEventType, DownloadProgress, DownloadService,
   EventNamespace, EventsBusService, NotificationService as PushNotificationService, NotificationStatus,
   Profile, ProfileService, ProfileType,
-  ServerProfile, SharedPreferences
+  ServerProfile, SharedPreferences, UserFeedStatus
 } from 'sunbird-sdk';
 import {
   AppThemes, EventTopics, GenericAppConfig, PreferenceKey,
@@ -66,6 +67,22 @@ export class ApplicationHeaderComponent implements OnInit, OnDestroy {
   isDarkMode:boolean;
   showReports: any;
   showLoginButton = false;
+  notificationCount = {
+    unreadCount : 0
+  };
+  isTablet = false;
+  orientationToSwitch = AppOrientation.LANDSCAPE;
+
+  // Font Increase Decrease Variables
+  fontSize: any;
+  defaultFontSize = 16;
+  isGuestUser = true;
+  guestUserDetails;
+  showYearOfBirthPopup = false;
+  public isIOS = false;
+  @ViewChild('increaseFontSize') increaseFontSize: ElementRef;
+  @ViewChild('decreaseFontSize') decreaseFontSize: ElementRef;
+  @ViewChild('resetFontSize') resetFontSize: ElementRef;
 
   constructor(
     @Inject('SHARED_PREFERENCES') private preference: SharedPreferences,
@@ -89,7 +106,8 @@ export class ApplicationHeaderComponent implements OnInit, OnDestroy {
     private activePageService: ActivePageService,
     private popoverCtrl: PopoverController,
     private tncUpdateHandlerService: TncUpdateHandlerService,
-    private appHeaderService: AppHeaderService
+    private appHeaderService: AppHeaderService,
+    private renderer: Renderer2
   ) {
     this.setLanguageValue();
     this.events.subscribe('onAfterLanguageChange:update', (res) => {
@@ -98,9 +116,13 @@ export class ApplicationHeaderComponent implements OnInit, OnDestroy {
       }
     });
     this.events.subscribe('onPreferenceChange:showReport', res => {
-      this.showReports= res
-    })
+      this.showReports = res;
+    });
     this.getUnreadNotifications();
+    this.isTablet = window['isTablet'];
+    this.events.subscribe(EventTopics.ORIENTATION, () => {
+      this.checkCurrentOrientation();
+    });
   }
 
   ngOnInit() {
@@ -111,6 +133,9 @@ export class ApplicationHeaderComponent implements OnInit, OnDestroy {
     });
     this.events.subscribe('app-global:profile-obj-changed', () => {
       this.setAppLogo();
+    });
+    this.events.subscribe(EventTopics.NOTIFICATION_REFRESH, () => {
+      this.getUnreadNotifications();
     });
 
     this.events.subscribe('notification-status:update', (eventData) => {
@@ -143,6 +168,9 @@ export class ApplicationHeaderComponent implements OnInit, OnDestroy {
       this.isDarkMode = val === AppMode.DARKMODE;
     });
     this.checkForAppUpdate().then();
+  }
+  ngAfterViewInit() {
+    this.changeFontSize('reset');
   }
 
   private setAppVersion(): any {
@@ -271,17 +299,12 @@ export class ApplicationHeaderComponent implements OnInit, OnDestroy {
     this.events.subscribe('app-global:profile-obj-changed');
   }
 
-  getUnreadNotifications() {
-    let newNotificationCount = 0;
-    this.pushNotificationService.getAllNotifications({ notificationStatus: NotificationStatus.ALL }).subscribe((notificationList: any) => {
-      notificationList.forEach((item) => {
-        if (!item.isRead) {
-          newNotificationCount++;
-        }
-      });
-
-      this.isUnreadNotification = Boolean(newNotificationCount);
-    });
+  async getUnreadNotifications() {
+    await this.notification.fetchNotificationList().then((data) => {
+      const notificationList = data.feeds;
+      const unreadNotificationList = notificationList.filter((n: any) => n.status === UserFeedStatus.UNREAD);
+      this.notificationCount.unreadCount = unreadNotificationList.length;
+    })
   }
 
   async fetchManagedProfileDetails() {
@@ -363,9 +386,13 @@ export class ApplicationHeaderComponent implements OnInit, OnDestroy {
       cData,
       ID.BTN_SWITCH
     );
-    this.profileService.managedProfileManager.switchSessionToManagedProfile({ uid: user.id }).toPromise().then(res => {
+    this.profileService.managedProfileManager.switchSessionToManagedProfile({ uid: user.id }).toPromise().then(async res => {
       this.events.publish(AppGlobalService.USER_INFO_UPDATED);
       this.events.publish('loggedInProfile:update');
+      if(user.profileUserType && user.profileUserType.type){
+        await this.preference.putString(PreferenceKey.SELECTED_USER_TYPE, user.profileUserType.type).toPromise();
+        this.events.publish('UPDATE_TABS', {type: 'SWITCH_TABS_USERTYPE'});
+      }
       this.menuCtrl.close();
       this.showSwitchSuccessPopup(user.firstName);
       this.tncUpdateHandlerService.checkForTncUpdate();
@@ -497,5 +524,74 @@ export class ApplicationHeaderComponent implements OnInit, OnDestroy {
     this.showLoginButton = (this.commonUtilService.isAccessibleForNonStudentRole(profileType)
             && this.appGlobalService.DISPLAY_SIGNIN_FOOTER_CARD_IN_PROFILE_TAB_FOR_TEACHER) ||
         (profileType === ProfileType.STUDENT && this.appGlobalService.DISPLAY_SIGNIN_FOOTER_CARD_IN_PROFILE_TAB_FOR_STUDENT);
+  }
+
+  private async checkCurrentOrientation() {
+    const currentOritentation = await this.preference.getString(PreferenceKey.ORIENTATION).toPromise();
+    if ( currentOritentation === AppOrientation.LANDSCAPE) {
+      this.orientationToSwitch = AppOrientation.PORTRAIT;
+    } else {
+      this.orientationToSwitch = AppOrientation.LANDSCAPE;
+    }
+  }
+  
+
+  signin() { this.router.navigate([RouterLinks.SIGN_IN]); }
+
+  changeFontSize(value: string) {
+    const elFontSize = window.getComputedStyle(document.documentElement).getPropertyValue('font-size');
+
+    const localFontSize = localStorage.getItem('fontSize');
+    const currentFontSize = localFontSize ? localFontSize : elFontSize;
+    this.fontSize = parseInt(currentFontSize);
+    if (value === 'increase') {
+      this.renderer.setAttribute(this.increaseFontSize.nativeElement, 'aria-pressed', 'true');
+      this.renderer.removeAttribute(this.decreaseFontSize.nativeElement, 'aria-pressed');
+      this.renderer.removeAttribute(this.resetFontSize.nativeElement, 'aria-pressed');
+      this.fontSize = this.fontSize + 2;
+      if (this.fontSize <= 20) {
+        this.setLocalFontSize(this.fontSize);
+      }
+    } else if (value === 'decrease') {
+      this.renderer.setAttribute(this.decreaseFontSize.nativeElement, 'aria-pressed', 'true');
+      this.renderer.removeAttribute(this.increaseFontSize.nativeElement, 'aria-pressed');
+      this.renderer.removeAttribute(this.resetFontSize.nativeElement, 'aria-pressed');
+      this.fontSize = this.fontSize - 2;
+      if (this.fontSize >= 12) {
+        this.setLocalFontSize(this.fontSize);
+      }
+    } else {
+      this.renderer.setAttribute(this.resetFontSize.nativeElement, 'aria-pressed', 'true');
+      this.renderer.removeAttribute(this.increaseFontSize.nativeElement, 'aria-pressed');
+      this.renderer.removeAttribute(this.decreaseFontSize.nativeElement, 'aria-pressed');
+      this.setLocalFontSize(this.defaultFontSize);
+    }
+  }
+
+  setLocalFontSize(value: any) {
+    document.documentElement.style.setProperty('font-size', value + 'px', 'important');
+    localStorage.setItem('fontSize', value);
+    this.isDisableFontSize(value);
+  }
+
+  isDisableFontSize(value: any) {
+    value = parseInt(value);
+    if (value === 20) {
+      this.renderer.setAttribute(this.increaseFontSize.nativeElement, 'disabled', 'true');
+      this.renderer.removeAttribute(this.decreaseFontSize.nativeElement, 'disabled');
+      this.renderer.removeAttribute(this.resetFontSize.nativeElement, 'disabled');
+    } else if (value === 12) {
+      this.renderer.setAttribute(this.decreaseFontSize.nativeElement, 'disabled', 'true');
+      this.renderer.removeAttribute(this.increaseFontSize.nativeElement, 'disabled');
+      this.renderer.removeAttribute(this.resetFontSize.nativeElement, 'disabled');
+    } else if (value === 16) {
+      this.renderer.setAttribute(this.resetFontSize.nativeElement, 'disabled', 'true');
+      this.renderer.removeAttribute(this.increaseFontSize.nativeElement, 'disabled');
+      this.renderer.removeAttribute(this.decreaseFontSize.nativeElement, 'disabled');
+    } else {
+      this.renderer.removeAttribute(this.increaseFontSize.nativeElement, 'disabled');
+      this.renderer.removeAttribute(this.decreaseFontSize.nativeElement, 'disabled');
+      this.renderer.removeAttribute(this.resetFontSize.nativeElement, 'disabled');
+    }
   }
 }

@@ -764,4 +764,46 @@ describe('CommonUtilService', () => {
 
   });
 
+  describe('fetchPrimaryCategory', () => {
+    it('should fetch primaryCategory from content and return trim and lowerCaseData', () => {
+      // arrange
+      // act
+      jest.spyOn(commonUtilService, 'appendTypeToPrimaryCategory').getMockImplementation();
+      commonUtilService.appendTypeToPrimaryCategory({primaryCategory: 'Digital Textbook'});
+      // assert
+      expect(commonUtilService.appendTypeToPrimaryCategory).toHaveReturnedWith('digitaltextbook-detail');
+    });
+
+    it('should fetch from contentType is primaryCategory is not available', () => {
+      // arrange
+      jest.spyOn(commonUtilService, 'appendTypeToPrimaryCategory').getMockImplementation();
+      // act
+      commonUtilService.appendTypeToPrimaryCategory({contentType: 'Digital Textbook'});
+      // assert
+      expect(commonUtilService.appendTypeToPrimaryCategory).toHaveReturnedWith('digitaltextbook-detail');
+    });
+  });
+
+  describe('getGuestUserConfig', () => {
+    it('should return guest profile', (done) => {
+      // arrange
+      mockSharedPreferences.getString = jest.fn(() => of('sample-uid'));
+      mockProfileService.getAllProfiles = jest.fn(() => of([
+        {
+          uid: 'sample-uid',
+          name: 'sample-name'
+        }, {
+          uid: 'login-user-uid'
+        }
+      ]));
+      // act
+      commonUtilService.getGuestUserConfig();
+      // assert
+      setTimeout(() => {
+        expect(mockSharedPreferences.getString).toHaveBeenCalledWith(PreferenceKey.GUEST_USER_ID_BEFORE_LOGIN);
+        expect(mockProfileService.getAllProfiles).toHaveBeenCalled();
+        done();
+      }, 0);
+    });
+  });
 });

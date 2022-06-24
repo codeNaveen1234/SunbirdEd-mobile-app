@@ -8,7 +8,7 @@
 
   img.arrow-icon {
     display: inline-block;
-    width: 22px;
+    width: 1.375rem;
     margin-top: -3px;
     float: right;
 
@@ -46,7 +46,7 @@
       right: 0;
     }
     50% {
-      right: 10px;
+      right: 0.625rem;
     }
     100% {
       right: 0;
@@ -59,7 +59,7 @@
   }
 
   .font-size-17 {
-    font-size: 17px !important;
+    font-size: 1.063rem !important;
   }
 }
 
@@ -72,9 +72,10 @@
 .language-card {
   box-sizing: border-box;
   width: 50%;
-  height: 136px;
-  padding: 5%;
-  border-radius: 16px;
+  height: 9rem;
+  padding: 1rem;
+  outline: none;
+  border-radius: 1rem;
 }
 
 .selected-lang {
@@ -101,7 +102,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  font-size: 20px;
+  font-size: 1.25rem;
   transform: translate(-50%, -50%);
 }
 
@@ -111,13 +112,13 @@
 .continue {
   position: fixed;
   z-index: 2;
-  bottom: 32px;
+  bottom: 2rem;
   width: 90vw;
   left: 5vw;
 }
 
 .app-title {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: bold;
   color: $blue;
   margin-top: 5vh;
@@ -132,3 +133,7 @@
   margin-right: 11px;
 }
 
+.bottom-section {
+  width: 4.688rem;
+  height: 4.688rem;
+}

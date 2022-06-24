@@ -2,7 +2,7 @@
 @import 'src/assets/styles/_custom-mixins.scss';
 @import 'src/assets/styles/_variables.scss';
 .filterIcon {
-  font-size: 30px;
+  font-size: 1.875rem;
   float: right;
   margin: 10px 15px;
   color: $primary-color;
@@ -25,4 +25,7 @@ h4 {
 }
 :host ::ng-deep h4 {
   font-size: 1rem;
+}
+.viewReportBtn {
+  text-transform: none !important;
 }
