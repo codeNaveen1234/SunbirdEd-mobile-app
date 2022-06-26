@@ -1,7 +1,11 @@
 <ion-card class="sb-dt-card">
-  <ion-card-header>
-    <ion-card-title>{{data?.title}}</ion-card-title>
+  
+  <ion-card-header class="flex-dc d-flex flex-basis-1">
+    <ion-card-title class="w-70">{{data?.title}}</ion-card-title>
     <ion-card-subtitle>{{data?.subTitle}}</ion-card-subtitle>
+    <div class="card-ribben-label" >
+      {{'CERTIFICATE' | translate}}
+    </div>
   </ion-card-header>
   <ion-card-content class="sb-content-info">
     <ng-content></ng-content>
