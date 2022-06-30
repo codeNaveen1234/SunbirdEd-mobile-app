@@ -9,7 +9,7 @@ import { AppHeaderService } from '@app/services';
 import {  ProjectService, ToastService } from '../../core';
 import { RouterLinks } from '@app/app/app.constant';
 import { actions } from '../../core/constants/actions.constants';
-import { GenericPopUpService } from '../../shared';
+import { GenericPopUpService, ProfileNameConfirmationPopoverComponent } from '../../shared';
 import { AppGlobalService } from '@app/services';
 
 @Component({
@@ -69,7 +69,7 @@ export class ProjectTemplateviewPage implements OnInit {
     private popupService: GenericPopUpService,
     private appGlobalService: AppGlobalService,
     private alert: AlertController,
-    private toast :ToastService
+    private toast :ToastService,
   ) {
 
     params.params.subscribe((parameters) => {
@@ -127,15 +127,20 @@ export class ProjectTemplateviewPage implements OnInit {
   }
 
   ngOnInit() {
+    // this.headerConfig = this.headerService.getDefaultPageConfig();
+    // this.headerConfig.actionButtons = [];
+    // this.headerConfig.showHeader = true;
+    // this.headerConfig.showBurgerMenu = false;
+    // this.headerService.updatePageConfig(this.headerConfig);
+  }
+
+  ionViewWillEnter() {
+    this.templateDetailsInit();
     this.headerConfig = this.headerService.getDefaultPageConfig();
     this.headerConfig.actionButtons = [];
     this.headerConfig.showHeader = true;
     this.headerConfig.showBurgerMenu = false;
     this.headerService.updatePageConfig(this.headerConfig);
-  }
-
-  ionViewWillEnter() {
-    this.templateDetailsInit();
   }
 
   async getProjectApi() {
@@ -186,14 +191,33 @@ export class ProjectTemplateviewPage implements OnInit {
     }
     if ( !this.isAssignedProject && !this.project.hasAcceptedTAndC && !this.isTargeted && !this.isATargetedSolution) {
       this.popupService.showPPPForProjectPopUp('FRMELEMNTS_LBL_PROJECT_PRIVACY_POLICY', 'FRMELEMNTS_LBL_PROJECT_PRIVACY_POLICY_TC', 'FRMELEMNTS_LBL_TCANDCP', 'FRMELEMNTS_LBL_SHARE_PROJECT_DETAILS', 'https://diksha.gov.in/term-of-use.html', 'privacyPolicy').then((data: any) => {
-        if (data && data.isClicked) {
+      if (data && data.isClicked) {
           this.project.hasAcceptedTAndC = data.isChecked;
-          this.start();
-          this.toast.showMessage('FRMELEMNTS_LBL_PROJECT_STARTED','success');
+          this.showProfileNameConfirmationPopup();
+          // this.start();
+          // this.toast.showMessage('FRMELEMNTS_LBL_PROJECT_STARTED','success');
         }
       })
     } else {
-      this.start();
+      this.showProfileNameConfirmationPopup();
+    }
+  }
+  private async showProfileNameConfirmationPopup() {
+    const popUp = await this.popoverController.create({
+      component: ProfileNameConfirmationPopoverComponent,
+      componentProps: {
+        // content: this.course
+      },
+      cssClass: 'sb-popover sb-profile-name-confirmation-popover',
+    });
+    await popUp.present();
+    const { data } = await popUp.onDidDismiss();
+    if (data !== undefined) {
+      if (data.buttonClicked) {
+          this.project.hasAcceptedTAndC = data.isChecked;
+          this.start();
+          this.project.hasAcceptedTAndC ? this.toast.showMessage('FRMELEMNTS_LBL_PROJECT_STARTED','success'):''
+      }
     }
   }
 
