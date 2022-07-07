@@ -1547,5 +1547,7 @@
   "FRMELEMNTS_MSG_DISCARD_EDIT_PROJECT": "Would you like to save the changes you have made before you exit the page?",
   "ERROR_RECOVERY_ID_PHONE_INVALID": "Enter 10 digit mobile number",
   "FRMELEMNTS_MSG_CERTIFICATE_CRITERIA_BFR_SUBMITTING":"Please ensure you have met the certificate criteria for this improvement project before submitting.",
-  "FRMELEMNTS_MSG_PROJECT_NAMEONCERT": "This name will be printed on your improvement certificate. Check if it is correct."
+  "FRMELEMNTS_MSG_PROJECT_NAMEONCERT": "This name will be printed on your improvement certificate. Check if it is correct.",
+  "FRMELEMNTS_MSG_MY_IMPS":"My improvements",
+  "FRMELEMNTS_LBL_CERTIFICATION_CRITERIA":"Certification Criteria"
 }

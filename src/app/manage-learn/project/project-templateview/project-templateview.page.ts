@@ -147,6 +147,29 @@ export class ProjectTemplateviewPage implements OnInit {
     this.actionItems = await actions.PROJECT_ACTIONS;
     let resp = await this.projectService.getTemplateBySoluntionId(this.id);
     this.project = resp.result;
+      // Testing Purpose
+      this.project.criteria =[
+        {
+          text : "Project Should be submitted within program Enddate",
+              condition : {
+            status: "submitted",
+            completedDate : "programEndDate"
+              }
+          },{
+          text : "Should add evidence at task level",
+              condition : {
+                  task_evidence: true,
+                  minNoOfEvidence : 1
+              }
+          },
+          {
+          text : "Should add evidence at project level",
+              condition : {
+            project_evidence: true,
+            minNoOfEvidence : 1
+              }
+          }
+      ]
     this.metaData = {
       title: this.project?.title,
       subTitle: this.project?.programInformation ? this.project?.programInformation?.programName : ''
@@ -159,6 +182,29 @@ export class ProjectTemplateviewPage implements OnInit {
     let resp = await this.projectService.getTemplateByExternalId(this.id);
     this.programId = resp?.result?.programInformation?.programId || null;
     this.project = resp?.result;
+      // Testing Purpose
+      this.project.criteria =[
+        {
+          text : "Project Should be submitted within program Enddate",
+              condition : {
+            status: "submitted",
+            completedDate : "programEndDate"
+              }
+          },{
+          text : "Should add evidence at task level",
+              condition : {
+                  task_evidence: true,
+                  minNoOfEvidence : 1
+              }
+          },
+          {
+          text : "Should add evidence at project level",
+              condition : {
+            project_evidence: true,
+            minNoOfEvidence : 1
+              }
+          }
+      ]
     if (this.project?.projectId) {
       this.buttonLabel = 'FRMELEMNTS_LBL_CONTINUE_IMPROVEMENT'
     }

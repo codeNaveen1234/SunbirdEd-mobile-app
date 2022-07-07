@@ -142,6 +142,34 @@ export class ProfilePage implements OnInit {
   learnerPassbook: any[] = [];
   learnerPassbookCount: any;
   enrolledCourseList = [];
+  myImprovements={
+    "message": "User project fetched successfully",
+    "status": 200,
+    "result": {
+        "data" : [
+            {
+                "_id": "60793b80bd49095a19ddeae1",
+                "title": "Project with learning resources",
+                "certificate": {
+                    "osid": "1-21c8ecab-7b8d-40f1-9961-cae7fcb6a5f9",
+                    "url" : "",
+                    "status" : "REVOKED",
+                    "issuedOn" : "2020-12-03 13:22:31.988Z"
+                },
+                "status": "submitted",
+                "lastSync" : "2021-02-02 10:10:00.950Z"
+            },
+            {
+                "_id": "6011136a2d25b926974d9ec9",
+                "title": "Keep Our Schools Alive! (Petition)",
+                "status": "inProgress",
+                "lastSync" : "2021-02-02 10:10:00.950Z"
+            }
+        ],
+        "count": 2,
+        "certificateCount": 1
+    }
+}
   constructor(
     @Inject('PROFILE_SERVICE') private profileService: ProfileService,
     @Inject('AUTH_SERVICE') private authService: AuthService,
