@@ -2,12 +2,12 @@
   <div [ngClass]="{'disablePage' : viewOnlyMode}">
     <div class="heading-name" (click)="edit('task',task?.name)">
       <h4 *ngIf="editField != 'name'">{{task?.name}}</h4>
-      <ion-icon name="create" color="primary" class="iconAdj"> </ion-icon>
+      <ion-icon name="create" color="primary" class="iconAdj" *ngIf="task.isDeletable"> </ion-icon>
     </div>
 
     <ion-row>
       <ion-col size="3">
-        <img src="assets/imgs/timetable.png" class="filter-icon" (click)="setTaskEndDate()"  alt=""/>
+        <img src="assets/imgs/timetable.png" class="filter-icon-calendar" (click)="setTaskEndDate()"  alt=""/>
       </ion-col>
       <ion-col size="9">
         <ion-datetime (ionChange)="setDate()" #dateTime value="{{task?.endDate}}" display-timezone="utc"
@@ -60,7 +60,7 @@
             {{subtask.name}}
           </ion-col>
           <ion-col size="1" style="margin: auto; text-align: center" *ngIf="subtask.isDeletable">
-            <img src="assets/imgs/Delete.png" class="filter-icon" style="width: 20px"
+            <img src="assets/imgs/Delete.png" class="filter-icon" style="width: 1.25rem"
               (click)="askPermissionToDelete(subtask,'subtask')" alt=""/>
           </ion-col>
         </ion-row>
@@ -95,7 +95,7 @@
 
     <ion-row *ngIf="task?.learningResources?.length">
       <ion-col size="5">
-        <ion-button class="roundedButton" expand="block" shape="round" (click)="openResources(task)">
+        <ion-button class="roundedButton custom-btn-txt-transform-none" expand="block" shape="round" (click)="openResources(task)">
           {{'FRMELEMNTS_LBL_VIEW_RESOURCES' | translate}}
         </ion-button>
       </ion-col>

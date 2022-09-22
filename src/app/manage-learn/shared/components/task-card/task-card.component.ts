@@ -123,7 +123,7 @@ export class TaskCardComponent implements OnInit {
 
   async askPermissionToDelete(type, index) {
     let data;
-    this.translate.get(["FRMELEMNTS_MSG_DELETE_TASK_CONFIRMATION", "CANCEL", "BTN_SUBMIT"]).subscribe((text) => {
+    this.translate.get(["FRMELEMNTS_MSG_DELETE_TASK_CONFIRMATION", "NO", "YES"]).subscribe((text) => {
       data = text;
     });
     const alert = await this.alert.create({
@@ -131,13 +131,13 @@ export class TaskCardComponent implements OnInit {
       cssClass: 'central-alert',
       buttons: [
         {
-          text: data["CANCEL"],
+          text: data["NO"],
           role: "cancel",
           cssClass: "secondary",
           handler: (blah) => { },
         },
         {
-          text: data["BTN_SUBMIT"],
+          text: data["YES"],
           handler: () => {
             const obj = {
               type: type,
@@ -145,7 +145,7 @@ export class TaskCardComponent implements OnInit {
             }
             this.actionEvent.emit(obj);
           },
-        },
+        }
       ],
     });
     await alert.present();

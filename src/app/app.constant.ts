@@ -171,6 +171,7 @@ export class EventTopics {
     public static readonly BANNER = 'banner';
     public static readonly NOTIFICATION_REFRESH = 'notification:refresh';
     public static readonly ORIENTATION = 'orientation';
+    public static readonly LAST_ACCESS_ON = 'last_access_on';
 }
 
 export class ShareUrl {
@@ -243,6 +244,7 @@ export class PreferenceKey {
     public static readonly IS_GOOGLE_LOGIN = 'is_google_login';
     public static readonly IS_APPLE_LOGIN = 'is_apple_login';
     public static readonly ORIENTATION = 'orientation';
+    public static readonly GUEST_USER_LOCATION = 'guest-user-location';
 }
 
 export enum SwitchableTabsConfig {
@@ -631,6 +633,10 @@ export class RouterLinks {
     public static readonly SIGN_IN = 'sign-in';
     // my-playlist page
     public static readonly MY_PLAYLIST = 'my-playlist';
+    // Registration Pages
+    public static readonly SIGNUP_BASIC = 'signup-basic-info';
+    public static readonly SIGNUP_EMAIL = 'signup-email';
+    public static readonly OTP = 'otp';
 }
 
 export class ShareItemType {

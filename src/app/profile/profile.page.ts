@@ -75,6 +75,7 @@ import { CsPrimaryCategory } from '@project-sunbird/client-services/services/con
 import { FormConstants } from '../form.constants';
 import { ProfileHandler } from '@app/services/profile-handler';
 import { SegmentationTagService, TagPrefixConstants } from '@app/services/segmentation-tag/segmentation-tag.service';
+import { OrganizationSearchCriteria } from '@project-sunbird/sunbird-sdk';
 
 @Component({
   selector: 'app-profile',
@@ -574,6 +575,7 @@ export class ProfilePage implements OnInit {
       PageId.PROFILE,
       telemetryObject,
       values);
+
     await this.checkForPermissions().then(async (result) => {
       if (result) {
         if (course.issuedCertificate) {
@@ -584,9 +586,13 @@ export class ProfilePage implements OnInit {
               return;
             }
           }
+          if (this.platform.is('ios')) {
+            (window as any).cordova.InAppBrowser.open(request.certificate['templateUrl'], '_blank', "toolbarposition=top");
+          } else {
             this.router.navigate([`/${RouterLinks.PROFILE}/${RouterLinks.CERTIFICATE_VIEW}`], {
               state: { request }
             });
+          }
         } else {
           if (!this.commonUtilService.networkInfo.isNetworkAvailable) {
             this.commonUtilService.showToast('OFFLINE_CERTIFICATE_MESSAGE', false, '', 3000, 'top');
@@ -739,10 +745,8 @@ export class ProfilePage implements OnInit {
   async editMobileNumber() {
     const componentProps = {
       phone: this.profile.phone,
-      title: this.profile.phone ?
-        this.commonUtilService.translateMessage('EDIT_PHONE_POPUP_TITLE') :
-        this.commonUtilService.translateMessage('ENTER_PHONE_POPUP_TITLE'),
-      description: '',
+      title: this.commonUtilService.translateMessage('UPDATE_PHONE_POPUP_TITLE'),
+      description: this.commonUtilService.translateMessage('ERROR_RECOVERY_ID_PHONE_INVALID'),
       type: ProfileConstants.CONTACT_TYPE_PHONE,
       userId: this.profile.userId
     };
@@ -755,10 +759,8 @@ export class ProfilePage implements OnInit {
   async editEmail() {
     const componentProps = {
       email: this.profile.email,
-      title: this.profile.email ?
-        this.commonUtilService.translateMessage('EDIT_EMAIL_POPUP_TITLE') :
-        this.commonUtilService.translateMessage('EMAIL_PLACEHOLDER'),
-      description: '',
+      title: this.commonUtilService.translateMessage('UPDATE_EMAIL_POPUP_TITLE'),
+      description: this.commonUtilService.translateMessage('EMAIL_PLACEHOLDER'),
       type: ProfileConstants.CONTACT_TYPE_EMAIL,
       userId: this.profile.userId
     };
@@ -767,7 +769,7 @@ export class ProfilePage implements OnInit {
     .then((_) => this.showEditContactPopup(componentProps))
     .catch(e => {
       if (e && e.response && e.response.body && e.response.body.params && e.response.body.params.err &&
-        e.response.body.params.err === 'ERROR_RATE_LIMIT_EXCEEDED') {
+        e.response.body.params.err === 'UOS_OTPCRT0059') {
         this.commonUtilService.showToast('ERROR_OTP_LIMIT_EXCEEDED');
       } else if (e.message !== 'CANCEL') {
         this.commonUtilService.showToast('SOMETHING_WENT_WRONG');
@@ -1114,6 +1116,21 @@ export class ProfilePage implements OnInit {
       const tenantPersonaList = await this.formAndFrameworkUtilService.getFormFields(
         FormConstants.TENANT_PERSONAINFO, this.profile.rootOrg.rootOrgId);
       const tenantConfig: any = tenantPersonaList.find(config => config.code === 'tenant');
+      const searchOrganizationReq: OrganizationSearchCriteria<{ orgName: string, rootOrgId: string}> = {
+        filters: {
+            isTenant: true
+        },
+        fields: ['orgName', 'rootOrgId']
+    };
+      const organisations = (await this.frameworkService.searchOrganization(searchOrganizationReq).toPromise()).content;
+      let index = 0;
+      const organisationList = organisations.map((org) => ({
+        value: org.rootOrgId,
+        label: org.orgName,
+        index: index++
+      }));
+      index = 0;
+      tenantConfig.templateOptions.options = organisationList;
       const tenantDetails = tenantConfig.templateOptions && tenantConfig.templateOptions.options &&
         tenantConfig.templateOptions.options.find(tenant => tenant.value === this.selfDeclarationInfo.orgId);
 
@@ -1143,7 +1160,7 @@ export class ProfilePage implements OnInit {
     const translatedMsg = this.commonUtilService.translateMessage('SHARE_USERNAME', {
       app_name: this.appName,
       user_name: fullName,
-      diksha_id: this.profile.userName
+      sunbird_id: this.profile.userName
     });
     this.socialSharing.share(translatedMsg);
   }

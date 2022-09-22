@@ -3,8 +3,8 @@
   <div class="d-flex flex-jc-flex-end grade_ellipsis info">
     <ion-button
       size="small"
-      class="button button-small button-solid hydrated ion-activatable ion-focusable m-12 md button-clr ion-text-capitalize"
-      (click)="addEntity()"
+      class="button custom-btn-txt-transform-none button-small button-solid hydrated ion-activatable ion-focusable m-12 md button-clr ion-text-capitalize"
+      (click)="addEntity()" [disabled]="disableAddEntity"
       >{{ 'ADD' | translate }} {{entityType}}</ion-button
     >
   </div>
