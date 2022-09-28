@@ -75,6 +75,7 @@ import { CsPrimaryCategory } from '@project-sunbird/client-services/services/con
 import { FormConstants } from '../form.constants';
 import { ProfileHandler } from '@app/services/profile-handler';
 import { SegmentationTagService, TagPrefixConstants } from '@app/services/segmentation-tag/segmentation-tag.service';
+import { OrganizationSearchCriteria } from '@project-sunbird/sunbird-sdk';
 
 @Component({
   selector: 'app-profile',
@@ -767,7 +768,7 @@ export class ProfilePage implements OnInit {
     .then((_) => this.showEditContactPopup(componentProps))
     .catch(e => {
       if (e && e.response && e.response.body && e.response.body.params && e.response.body.params.err &&
-        e.response.body.params.err === 'ERROR_RATE_LIMIT_EXCEEDED') {
+        e.response.body.params.err === 'UOS_OTPCRT0059') {
         this.commonUtilService.showToast('ERROR_OTP_LIMIT_EXCEEDED');
       } else if (e.message !== 'CANCEL') {
         this.commonUtilService.showToast('SOMETHING_WENT_WRONG');
@@ -1114,6 +1115,21 @@ export class ProfilePage implements OnInit {
       const tenantPersonaList = await this.formAndFrameworkUtilService.getFormFields(
         FormConstants.TENANT_PERSONAINFO, this.profile.rootOrg.rootOrgId);
       const tenantConfig: any = tenantPersonaList.find(config => config.code === 'tenant');
+      const searchOrganizationReq: OrganizationSearchCriteria<{ orgName: string, rootOrgId: string}> = {
+        filters: {
+            isTenant: true
+        },
+        fields: ['orgName', 'rootOrgId']
+    };
+      const organisations = (await this.frameworkService.searchOrganization(searchOrganizationReq).toPromise()).content;
+      let index = 0;
+      const organisationList = organisations.map((org) => ({
+        value: org.rootOrgId,
+        label: org.orgName,
+        index: index++
+      }));
+      index = 0;
+      tenantConfig.templateOptions.options = organisationList;
       const tenantDetails = tenantConfig.templateOptions && tenantConfig.templateOptions.options &&
         tenantConfig.templateOptions.options.find(tenant => tenant.value === this.selfDeclarationInfo.orgId);
 

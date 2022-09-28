@@ -35,7 +35,12 @@ import {
   ContentUpdate,
   CourseService,
   SunbirdSdk,
-  PlayerService
+  PlayerService,
+  ContentAccess,
+  ContentAccessStatus,
+  ContentMarkerRequest,
+  MarkerType,
+  Profile
 } from 'sunbird-sdk';
 
 import { Map } from '@app/app/telemetryutil';
@@ -86,6 +91,7 @@ import {FormConstants} from '@app/app/form.constants';
 import { TagPrefixConstants } from '@app/services/segmentation-tag/segmentation-tag.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ScreenOrientation } from '@ionic-native/screen-orientation/ngx';
+import { DownloadTranscriptPopupComponent } from '../components/popups/download-transcript-popup/download-transcript-popup.component';
 
 
 declare const cordova;
@@ -190,6 +196,8 @@ export class ContentDetailsPage implements OnInit, OnDestroy {
   config: any;
   nextContentToBePlayed: any;
   isPlayerPlaying = false;
+  // displayTranscripts = false;
+  // transcriptList = [];
 
   constructor(
     @Inject('PROFILE_SERVICE') private profileService: ProfileService,
@@ -589,6 +597,7 @@ export class ContentDetailsPage implements OnInit, OnDestroy {
 
     this.playingContent = data;
     this.telemetryObject = ContentUtil.getTelemetryObject(this.content);
+    this.markContent();
 
     // Check locally available
     if (Boolean(data.isAvailableLocally)) {
@@ -629,8 +638,9 @@ export class ContentDetailsPage implements OnInit, OnDestroy {
         this.showSwitchUserAlert(false);
       }
     }
-    if ( (this.content.mimeType === 'video/mp4' || this.content.mimeType === 'video/webm')
-    && Object.keys(this.content.contentData["interceptionPoints"]).length === 0 ) {
+    if ( (this.content.mimeType === 'video/mp4' || this.content.mimeType === 'video/webm') &&
+    !(typeof this.content.contentData['interceptionPoints'] === 'object' && this.content.contentData['interceptionPoints'] != null &&
+     Object.keys(this.content.contentData['interceptionPoints']).length !== 0) ) {
       this.getNextContent(data.hierarchyInfo, data.identifier);
       this.playContent(true, true);
     }
@@ -1300,8 +1310,9 @@ export class ContentDetailsPage implements OnInit, OnDestroy {
     }
   }
 
-  playNextContent(){
+  playNextContent() {
     const content = this.nextContentToBePlayed;
+    this.config = undefined;
     this.events.publish(EventTopics.NEXT_CONTENT, {
       content,
       course: this.course
@@ -1669,4 +1680,39 @@ export class ContentDetailsPage implements OnInit, OnDestroy {
     await popoverElement.present();
   }
 
+  async showDownloadTranscript() {
+      const newThemePopover = await this.popoverCtrl.create({
+          component: DownloadTranscriptPopupComponent,
+          componentProps: {
+            contentData: this.content.contentData
+          },
+          backdropDismiss: false,
+          showBackdrop: true,
+          cssClass: 'download-transcript-popup'
+      });
+      newThemePopover.present();
+  }
+
+  markContent() {
+    const addContentAccessRequest: ContentAccess = {
+      status: ContentAccessStatus.PLAYED,
+      contentId: this.identifier,
+      contentType: this.content.contentType
+    };
+    const profile: Profile = this.appGlobalService.getCurrentUser();
+    this.profileService.addContentAccess(addContentAccessRequest).toPromise().then((data) => {
+      if (data) {
+        this.events.publish(EventTopics.LAST_ACCESS_ON, true);
+      }
+    });
+    const contentMarkerRequest: ContentMarkerRequest = {
+      uid: profile.uid,
+      contentId: this.identifier,
+      data: JSON.stringify(this.content.contentData),
+      marker: MarkerType.PREVIEWED,
+      isMarked: true,
+      extraInfo: {}
+    };
+    this.contentService.setContentMarker(contentMarkerRequest).toPromise().then();
+  }
 }
