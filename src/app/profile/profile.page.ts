@@ -575,6 +575,7 @@ export class ProfilePage implements OnInit {
       PageId.PROFILE,
       telemetryObject,
       values);
+
     await this.checkForPermissions().then(async (result) => {
       if (result) {
         if (course.issuedCertificate) {
@@ -585,9 +586,13 @@ export class ProfilePage implements OnInit {
               return;
             }
           }
+          if (this.platform.is('ios')) {
+            (window as any).cordova.InAppBrowser.open(request.certificate['templateUrl'], '_blank', "toolbarposition=top");
+          } else {
             this.router.navigate([`/${RouterLinks.PROFILE}/${RouterLinks.CERTIFICATE_VIEW}`], {
               state: { request }
             });
+          }
         } else {
           if (!this.commonUtilService.networkInfo.isNetworkAvailable) {
             this.commonUtilService.showToast('OFFLINE_CERTIFICATE_MESSAGE', false, '', 3000, 'top');
@@ -740,10 +745,8 @@ export class ProfilePage implements OnInit {
   async editMobileNumber() {
     const componentProps = {
       phone: this.profile.phone,
-      title: this.profile.phone ?
-        this.commonUtilService.translateMessage('EDIT_PHONE_POPUP_TITLE') :
-        this.commonUtilService.translateMessage('ENTER_PHONE_POPUP_TITLE'),
-      description: '',
+      title: this.commonUtilService.translateMessage('UPDATE_PHONE_POPUP_TITLE'),
+      description: this.commonUtilService.translateMessage('ERROR_RECOVERY_ID_PHONE_INVALID'),
       type: ProfileConstants.CONTACT_TYPE_PHONE,
       userId: this.profile.userId
     };
@@ -756,10 +759,8 @@ export class ProfilePage implements OnInit {
   async editEmail() {
     const componentProps = {
       email: this.profile.email,
-      title: this.profile.email ?
-        this.commonUtilService.translateMessage('EDIT_EMAIL_POPUP_TITLE') :
-        this.commonUtilService.translateMessage('EMAIL_PLACEHOLDER'),
-      description: '',
+      title: this.commonUtilService.translateMessage('UPDATE_EMAIL_POPUP_TITLE'),
+      description: this.commonUtilService.translateMessage('EMAIL_PLACEHOLDER'),
       type: ProfileConstants.CONTACT_TYPE_EMAIL,
       userId: this.profile.userId
     };
@@ -1159,7 +1160,7 @@ export class ProfilePage implements OnInit {
     const translatedMsg = this.commonUtilService.translateMessage('SHARE_USERNAME', {
       app_name: this.appName,
       user_name: fullName,
-      diksha_id: this.profile.userName
+      sunbird_id: this.profile.userName
     });
     this.socialSharing.share(translatedMsg);
   }

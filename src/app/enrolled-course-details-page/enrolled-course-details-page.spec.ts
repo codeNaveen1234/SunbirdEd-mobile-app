@@ -199,7 +199,7 @@ describe('EnrolledCourseDetailsPage', () => {
     describe('ngOnInit()', () => {
         it('should get App name and subscribe utility service by invoked ngOnInit()', () => {
             // arrange
-            mockCommonUtilService.getAppName = jest.fn(() => Promise.resolve('DIKSHA'));
+            mockCommonUtilService.getAppName = jest.fn(() => Promise.resolve('SUNBIRD'));
             mockDownloadService.trackDownloads = jest.fn(() => of());
             spyOn(enrolledCourseDetailsPage, 'subscribeUtilityEvents').and.returnValue('BASE_URL');
             const mockProfileRes = {
@@ -2616,7 +2616,7 @@ describe('EnrolledCourseDetailsPage', () => {
                 enrolledDate: '2018-11-12T10:57:02.000+0000'
             };
             enrolledCourseDetailsPage.course = {
-                lastUpdatedOn: '2018-11-11T10:57:02.000+0000'
+                lastPublishedOn: '2018-11-11T10:57:02.000+0000'
             };
             // act
             const isModified = enrolledCourseDetailsPage.isCourseModifiedAfterEnrolment();
@@ -2630,7 +2630,7 @@ describe('EnrolledCourseDetailsPage', () => {
                 enrolledDate: '2018-11-12T10:57:02.000+0000'
             };
             enrolledCourseDetailsPage.course = {
-                lastUpdatedOn: '2018-11-13T10:57:02.000+0000'
+                lastPublishedOn: '2018-11-13T10:57:02.000+0000'
             };
             // act
             const isModified = enrolledCourseDetailsPage.isCourseModifiedAfterEnrolment();
