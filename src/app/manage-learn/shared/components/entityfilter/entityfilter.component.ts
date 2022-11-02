@@ -28,6 +28,7 @@ export class EntityfilterComponent implements OnInit {
     count: 0,
   };
   solutionId: any;
+  entity:any;
   searchQuery;
   allStates: Array<Object>;
   profileMappedState: any;
@@ -52,6 +53,7 @@ export class EntityfilterComponent implements OnInit {
     this.searchUrl = urlConstants.API_URLS.SEARCH_ENTITY;
     this.observationId = this.navParams.get('data');
     this.solutionId = this.navParams.get('solutionId');
+    this.entity = this.navParams.get('entity');
     // this.localStorage
     //   .getLocalStorage('profileRole')
   }

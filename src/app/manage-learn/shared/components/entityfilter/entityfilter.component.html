@@ -5,7 +5,7 @@
         debounce="500"
         (keyup.enter)="searchEntity()"
         [(ngModel)]="searchQuery"
-        placeholder="Search Entity "
+        placeholder="Search {{entity}}"
         (ionClear)="searchQuery = ''; searchEntity()"
       ></ion-searchbar>
       <ion-button ion-button icon-only (click)="searchEntity()" class="serachBtn">
