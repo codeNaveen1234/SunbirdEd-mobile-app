@@ -89,14 +89,12 @@
     "cordova-plugin-androidx-adapter": "^1.1.3",
     "cordova-plugin-appavailability": "^0.4.2",
     "cordova-plugin-badge": "^0.8.8",
-    "cordova-plugin-camera": "^5.0.1",
     "cordova-plugin-chooser": "^1.3.2",
     "cordova-plugin-code-push": "^2.0.0",
     "cordova-plugin-device": "^2.0.3",
     "cordova-plugin-dialogs": "^2.0.2",
     "cordova-plugin-document-viewer": "^0.9.13",
     "cordova-plugin-file-opener2": "^2.2.1",
-    "cordova-plugin-file-transfer": "git+https://github.com/apache/cordova-plugin-file-transfer.git",
     "cordova-plugin-filechooser": "^1.2.0",
     "cordova-plugin-filepath": "^1.5.8",
     "cordova-plugin-filepicker": "^1.1.6",
@@ -190,9 +188,11 @@
     "cordova-plugin-android-downloadmanager": "git+https://github.com/Sunbird-Ed/sb-cordova-plugin-downloadmanager.git",
     "cordova-plugin-app-version": "^0.1.12",
     "cordova-plugin-awesome-shared-preferences": "git+https://github.com/adriano-di-giovanni/cordova-plugin-shared-preferences.git",
+    "cordova-plugin-camera": "^5.0.2",
     "cordova-plugin-console": "^1.1.0",
     "cordova-plugin-fcm-with-dependecy-updated": "git+https://github.com/Sunbird-Ed/sb-cordova-plugin-fcm.git#release-5.0.2",
     "cordova-plugin-file": "^7.0.0",
+    "cordova-plugin-file-transfer": "git+https://github.com/apache/cordova-plugin-file-transfer.git",
     "cordova-plugin-inappupdatemanager": "git+https://github.com/subranil/cordova-plugin-inappupdatemanager.git#release-3.7.0",
     "cordova-plugin-local-notification": "git+https://github.com/katzer/cordova-plugin-local-notifications.git",
     "cordova-plugin-openrap": "git+https://github.com/project-sunbird/cordova-plugin-openrap.git",
@@ -271,7 +271,6 @@
       "cordova-plugin-androidx-adapter": {},
       "cordova-plugin-secure-storage-echo": {},
       "cordova-plugin-appavailability": {},
-      "cordova-plugin-camera": {},
       "cordova-plugin-filepath": {},
       "cordova-plugin-chooser": {},
       "cordova-plugin-filepicker": {},
@@ -286,7 +285,10 @@
       },
       "uk.co.workingedge.phonegap.plugin.istablet": {},
       "cordova-plugin-console": {},
-      "cordova-plugin-sunbirdsplash": {}
+      "cordova-plugin-sunbirdsplash": {},
+      "cordova-plugin-camera": {
+        "ANDROID_SUPPORT_V4_VERSION": "27.+"
+      }
     },
     "platforms": [
       "android"
