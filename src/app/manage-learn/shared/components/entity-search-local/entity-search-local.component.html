@@ -16,7 +16,7 @@
     </div>
   </ion-toolbar>
 </ion-header>
-<ion-content padding [ngStyle]="{ 'margin-top': profileMappedState ? '0px' : '50px' }">
+<ion-content padding>
   <div>
     <ng-container *ngIf="( data.entities | entitySearch : searchText) as result">
     <div *ngFor="let entity of result" (click)="entityClickAction(entity,'onClick')">
@@ -33,7 +33,7 @@
     </div>
     <ion-list *ngIf="result.length === 0">
       <div class="text-center noDataMsg">
-     <div class="m-10-15"> <b>  {{ 'EMPTY_SEARCH_RESULTS' | translate }}</b></div>
+     <div class="m-10-15"> <b>  {{ 'NO_DATA_FOUND' | translate }}</b></div>
       <div class="m-10-15">
         {{'FRMELEMNTS_MSG_NO_DATA_FOR_LOCAL_SEARCH' | translate:{'entity': data.entityType} }}
         </div>
