@@ -19,8 +19,9 @@
   <app-item-list-header *ngIf="selectedFilter" headerLabel="{{'FRMELEMNTS_LBL_PROJECTS' | translate}} {{selectedFilter | lowercase}}"></app-item-list-header>
   </div>
   <app-item-list-card *ngFor="let project of projects " [title]="project?.name||project?.title" id="projectsCard"
-    [subTitle]="project?.programName" [id]="project?._id" (cardSelect)="doAction($event, project)">
-    <div class="certificate-tag" certificate *ngIf="project?.certificateTemplateId">
+    [subTitle]="project?.programName" [id]="project?._id" (cardSelect)="doAction($event, project)"> 
+    {{project?.certificate | json}}
+    <div class="certificate-tag" certificate *ngIf="project?.certificate">
       {{'CERTIFICATE' | translate}}
     </div>
   </app-item-list-card>
