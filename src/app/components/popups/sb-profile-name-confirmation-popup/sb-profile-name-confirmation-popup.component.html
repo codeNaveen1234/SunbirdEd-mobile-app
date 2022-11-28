@@ -20,7 +20,9 @@
                     <img src="assets/imgs/edit-icon.svg" alt="edit-name" />
                 </span>
             </div>
-            <div class="pnc-padding-32"> {{'FRMELEMNTS_MSG_NAMEONCERT' | categoryKeyTranslate: content }} </div>
+            <div class="pnc-padding-32" *ngIf="content"> {{'FRMELEMNTS_MSG_NAMEONCERT' | categoryKeyTranslate: content }} </div>
+            <div class="pnc-padding-32" *ngIf="projectContent"> {{'FRMELEMNTS_MSG_CERTIFICATION_NAME_DISPLAY' | translate }} </div>
+
             <div class="pnc-padding-32"> {{'FRMELEMNTS_MSG_EDITCERTNAME' | translate: {'%appName': appName} }} </div>
             <div>
                 <ion-checkbox class="pnc-checkbox" color="secondary" checked="false" [(ngModel)]="doNotShowAgain">

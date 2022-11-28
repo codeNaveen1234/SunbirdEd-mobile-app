@@ -165,6 +165,7 @@ export class DistrictMappingPage implements OnDestroy {
   }
 
   async submit() {
+    debugger
     this.saveDeviceLocation();
     const locationCodes = [];
     for(const acc in this.formGroup.value.children['persona']) {
@@ -192,13 +193,16 @@ export class DistrictMappingPage implements OnDestroy {
       featureIdMap.location.LOCATION_CAPTURE,
       ID.SUBMIT_CLICKED
     );
+    debugger
     if (this.appGlobalService.isUserLoggedIn()) {
       if (!this.commonUtilService.networkInfo.isNetworkAvailable) {
         this.commonUtilService.showToast('INTERNET_CONNECTIVITY_NEEDED');
         return;
       }
+      debugger
       const name = this.formGroup.value['name'].replace(RegexPatterns.SPECIALCHARECTERSANDEMOJIS, '').trim();
       const userTypes = [];
+      debugger
       if (this.formGroup.value['persona'] && this.formGroup.value.children['persona'] && this.formGroup.value.children['persona']['subPersona'] && this.formGroup.value.children['persona']['subPersona'].length) {
         if (typeof this.formGroup.value.children['persona']['subPersona'] === 'string') {
           userTypes.push({
@@ -222,6 +226,7 @@ export class DistrictMappingPage implements OnDestroy {
           "type" : this.formGroup.value['persona']
         });
       }
+      debugger
       const req = {
         userId: this.appGlobalService.getCurrentUser().uid || this.profile.uid,
         profileLocation: locationCodes,
@@ -229,6 +234,7 @@ export class DistrictMappingPage implements OnDestroy {
         lastName: '',
         profileUserTypes: userTypes
       };
+      debugger
       if (this.isGoogleSignIn && this.userData.isMinor) {
           const navigationExtras: NavigationExtras = {
             state: {
@@ -244,6 +250,7 @@ export class DistrictMappingPage implements OnDestroy {
           req['firstName'] = this.userData.name;
           req['dob'] = this.userData.dob;
         }
+        debugger
         const loader = await this.commonUtilService.getLoader();
         await loader.present();
         const isSSOUser = await this.tncUpdateHandlerService.isSSOUser(this.profile);
@@ -258,6 +265,7 @@ export class DistrictMappingPage implements OnDestroy {
             this.generateLocationCaptured(false);
             this.commonUtilService.showToast('PROFILE_UPDATE_SUCCESS');
             this.events.publish('loggedInProfile:update', req);
+            debugger
             if (this.isGoogleSignIn) {
               const categoriesProfileData = {
                 hasFilledLocation: true,
@@ -267,11 +275,14 @@ export class DistrictMappingPage implements OnDestroy {
                 state: categoriesProfileData
               });
             } else if (this.profile && (this.source === PageId.GUEST_PROFILE || this.source === PageId.PROFILE_NAME_CONFIRMATION_POPUP)) {
+              debugger
                 this.location.back();
             } else if (this.profile && this.source === PageId.PROFILE) {
+              debugger
                 this.location.back();
                 this.events.publish('UPDATE_TABS', {type: 'SWITCH_TABS_USERTYPE'});
             } else {
+              debugger
               if (this.profile && !isSSOUser) {
                 this.appGlobalService.showYearOfBirthPopup(this.profile.serverProfile);
               }
@@ -284,6 +295,7 @@ export class DistrictMappingPage implements OnDestroy {
               }
             }
           }).catch(async () => {
+            debugger
             await loader.dismiss();
             this.commonUtilService.showToast('PROFILE_UPDATE_FAILED');
             if (this.profile) {

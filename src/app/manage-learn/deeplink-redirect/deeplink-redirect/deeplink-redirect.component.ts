@@ -66,9 +66,10 @@ export class DeeplinkRedirectComponent implements OnInit {
         this.verifyLink(this.data.create_observation_id);
         break;
       case 'projectLink':
+        console.log('69')
         this.appGlobalService.isUserLoggedIn() ?  
         this.verifyLink(this.data.create_project_id) :     
-        this.router.navigate([`${RouterLinks.PROJECT}/${RouterLinks.PROJECT_TEMPLATE}`,this.data.create_project_id], {replaceUrl: true});
+        this.router.navigate([`${RouterLinks.PROJECT}/${RouterLinks.PROJECT_TEMPLATE}`,this.data.create_project_id]);
         break;
       default:
         break;
@@ -109,10 +110,10 @@ export class DeeplinkRedirectComponent implements OnInit {
   }
 
   goToTemplateDetails(params) {
+    console.log('112');
     this.router.navigate([`${RouterLinks.PROJECT}/${RouterLinks.PROJECT_TEMPLATE}`, params.solutionId], {
       queryParams: params,
       skipLocationChange: true,
-      replaceUrl: true,
       state: {
         "referenceFrom": "link",
     }

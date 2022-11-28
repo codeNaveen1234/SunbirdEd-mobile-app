@@ -11,6 +11,7 @@ import { RouterLinks } from '@app/app/app.constant';
 import { actions } from '../../core/constants/actions.constants';
 import { GenericPopUpService } from '../../shared';
 import { AppGlobalService } from '@app/services';
+import { ProfileNameConfirmationPopoverComponent } from '@app/app/components/popups/sb-profile-name-confirmation-popup/sb-profile-name-confirmation-popup.component';
 
 @Component({
   selector: 'app-project-templateview',
@@ -42,6 +43,7 @@ export class ProjectTemplateviewPage implements OnInit {
   shareTaskId;
   networkFlag: boolean;
   id;
+  isStarted : boolean = false;
   headerConfig = {
     showHeader: true,
     showBurgerMenu: false,
@@ -69,7 +71,7 @@ export class ProjectTemplateviewPage implements OnInit {
     private popupService: GenericPopUpService,
     private appGlobalService: AppGlobalService,
     private alert: AlertController,
-    private toast :ToastService
+    private toast :ToastService,
   ) {
 
     params.params.subscribe((parameters) => {
@@ -176,25 +178,31 @@ export class ProjectTemplateviewPage implements OnInit {
   }
 
   doAction() {
-    if(this.templateDetailsPayload?.referenceFrom == "observation" && !this.project?.projectId){
-      this.startProjectConfirmation();
-      return;
+    console.log(this.project.criteria,"this.project.criteria",this.isStarted);
+    if(this.project.criteria && !this.isStarted){
+      this.showProfileNameConfirmationPopup();
+    }else{
+      if(this.templateDetailsPayload?.referenceFrom == "observation" && !this.project?.projectId){
+        this.startProjectConfirmation();
+        return;
+      }
+      if(!this.appGlobalService.isUserLoggedIn()){
+        this.triggerLogin();
+        return
+      }
+      if ( !this.isAssignedProject && !this.project.hasAcceptedTAndC && !this.isTargeted && !this.isATargetedSolution) {
+        this.popupService.showPPPForProjectPopUp('FRMELEMNTS_LBL_PROJECT_PRIVACY_POLICY', 'FRMELEMNTS_LBL_PROJECT_PRIVACY_POLICY_TC', 'FRMELEMNTS_LBL_TCANDCP', 'FRMELEMNTS_LBL_SHARE_PROJECT_DETAILS', 'https://diksha.gov.in/term-of-use.html', 'privacyPolicy').then((data: any) => {
+          if (data && data.isClicked) {
+            this.project.hasAcceptedTAndC = data.isChecked;
+            this.start();
+            this.toast.showMessage('FRMELEMNTS_LBL_PROJECT_STARTED','success');
+          }
+        })
+      } else {
+        this.start();
+      }
     }
-    if(!this.appGlobalService.isUserLoggedIn()){
-      this.triggerLogin();
-      return
-    }
-    if ( !this.isAssignedProject && !this.project.hasAcceptedTAndC && !this.isTargeted && !this.isATargetedSolution) {
-      this.popupService.showPPPForProjectPopUp('FRMELEMNTS_LBL_PROJECT_PRIVACY_POLICY', 'FRMELEMNTS_LBL_PROJECT_PRIVACY_POLICY_TC', 'FRMELEMNTS_LBL_TCANDCP', 'FRMELEMNTS_LBL_SHARE_PROJECT_DETAILS', 'https://diksha.gov.in/term-of-use.html', 'privacyPolicy').then((data: any) => {
-        if (data && data.isClicked) {
-          this.project.hasAcceptedTAndC = data.isChecked;
-          this.start();
-          this.toast.showMessage('FRMELEMNTS_LBL_PROJECT_STARTED','success');
-        }
-      })
-    } else {
-      this.start();
-    }
+   
   }
 
   gotoDetails() {
@@ -296,10 +304,28 @@ export class ProjectTemplateviewPage implements OnInit {
     await alert.present();
   }
   openStartIMPPopup(){
-    this.popupService.showStartIMPForProjectPopUp('FRMELEMNTS_LBL_START_IMPROVEMENT', 'FRMELEMNTS_LBL_START_IMP_POPUP_MSG1', 'FRMELEMNTS_LBL_START_IMP_POPUP_MSG2',).then((data: any) => {
-      if(data){
+      this.popupService.showStartIMPForProjectPopUp('FRMELEMNTS_LBL_START_IMPROVEMENT', 'FRMELEMNTS_LBL_START_IMP_POPUP_MSG1', 'FRMELEMNTS_LBL_START_IMP_POPUP_MSG2',).then((data: any) => {
+        if(data){
+          this.doAction();
+        }
+      })
+   }
+
+   private async showProfileNameConfirmationPopup() {
+    const popUp = await this.popoverController.create({
+      component: ProfileNameConfirmationPopoverComponent,
+      componentProps: {
+        projectContent: this.project
+      },
+      cssClass: 'sb-popover sb-profile-name-confirmation-popover',
+    });
+    await popUp.present();
+    const { data } = await popUp.onDidDismiss();
+    if (data !== undefined) {
+      if (data.buttonClicked) {
+        this.isStarted = true;
         this.doAction();
       }
-    })
-   }
+    }
+  }
 }

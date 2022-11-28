@@ -16,6 +16,7 @@ import { NavigationService } from '@app/services/navigation-handler.service';
 })
 export class ProfileNameConfirmationPopoverComponent {
   @Input() content;
+  @Input() projectContent;
   appName;
   profile;
   doNotShowAgain = false;
@@ -27,7 +28,9 @@ export class ProfileNameConfirmationPopoverComponent {
     private navService: NavigationService,
     private appGlobalService: AppGlobalService,
     private commonUtilService: CommonUtilService
-  ) { }
+  ) { 
+    console.log(this.content,"content");
+  }
 
   async ionViewWillEnter() {
     this.commonUtilService.getAppName().then((res) => { this.appName = res; });
