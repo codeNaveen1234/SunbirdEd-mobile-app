@@ -13,7 +13,7 @@ import { AlertController, ModalController } from '@ionic/angular';
 import { UnnatiDataService } from '../../core/services/unnati-data.service';
 import { Location } from '@angular/common';
 import * as _ from 'underscore';
-import { CreateTaskFormComponent } from '../../shared';
+import { CreateTaskFormComponent, GenericPopUpService } from '../../shared';
 
 @Component({
   selector: 'app-project-details',
@@ -61,7 +61,8 @@ export class ProjectDetailsComponent implements OnInit {
     private modal: ModalController,
     private utils: UtilsService,
     private ngZone: NgZone,
-    private share: SharingFeatureService
+    private share: SharingFeatureService,
+    private popupService: GenericPopUpService
   ) {
     params.queryParams.subscribe((parameters) => {
       this.networkFlag = this.commonUtilService.networkInfo.isNetworkAvailable;
@@ -384,6 +385,17 @@ export class ProjectDetailsComponent implements OnInit {
       }
     });
     return await modal.present();
+  }
+
+  joinProgramPopup(){
+    let message="FRMELEMNTS_LBL_JOIN_PROGRAM_MSG | translate:{'name':this.projectDetails.programName}"
+    if(this.projectDetails.status !== statusType.submitted){
+      this.popupService.showJoinProgramForProjectPopup("FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP",this.projectDetails.programName,"project","FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP").then(
+        (data:any)=>{
+          console.log('DATA:',data)
+        }
+      )
+    }
   }
 
 }
