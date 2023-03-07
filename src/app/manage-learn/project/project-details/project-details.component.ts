@@ -61,8 +61,7 @@ export class ProjectDetailsComponent implements OnInit {
     private modal: ModalController,
     private utils: UtilsService,
     private ngZone: NgZone,
-    private share: SharingFeatureService,
-    private popupService: GenericPopUpService
+    private share: SharingFeatureService
   ) {
     params.queryParams.subscribe((parameters) => {
       this.networkFlag = this.commonUtilService.networkInfo.isNetworkAvailable;
