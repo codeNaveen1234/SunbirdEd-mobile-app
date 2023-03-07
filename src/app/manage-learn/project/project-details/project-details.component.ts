@@ -386,16 +386,4 @@ export class ProjectDetailsComponent implements OnInit {
     });
     return await modal.present();
   }
-
-  joinProgramPopup(){
-    let message="FRMELEMNTS_LBL_JOIN_PROGRAM_MSG | translate:{'name':this.projectDetails.programName}"
-    if(this.projectDetails.status !== statusType.submitted){
-      this.popupService.showJoinProgramForProjectPopup("FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP",this.projectDetails.programName,"project","FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP").then(
-        (data:any)=>{
-          console.log('DATA:',data)
-        }
-      )
-    }
-  }
-
 }
