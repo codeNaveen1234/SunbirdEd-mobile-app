@@ -4,6 +4,7 @@ import { PopoverController } from '@ionic/angular';
 import { SbGenericPopoverComponent } from '@app/app/components/popups/sb-generic-popover/sb-generic-popover.component';
 import { CommonUtilService } from '@app/services/common-util.service';
 import { StartImprovementComponent } from './components/start-improvement/start-improvement.component';
+import { JoinProgramComponent } from './components/join-program/join-program.component';
 
 @Injectable({
   providedIn: 'root',
@@ -59,13 +60,14 @@ export class GenericPopUpService {
     return data.isLeftButtonClicked;
   }
 
-  async showStartIMPForProjectPopUp(header,message, message1, ) {
+  async showStartIMPForProjectPopUp(header,message, message1,button ) {
     const alert = await this.popOverCtrl.create({
         component: StartImprovementComponent,
         componentProps: {
             message: message,
             message1: message1,
             header: header,
+            button: button
         },
         cssClass: 'sb-popover',
     });
@@ -73,4 +75,22 @@ export class GenericPopUpService {
     const { data } = await alert.onDidDismiss();
     return data;
 }
+
+  async showJoinProgramForProjectPopup(header,name,type,button){
+    const alert = await this.popOverCtrl.create({
+      component : JoinProgramComponent,
+      componentProps: {
+        header: header,
+        name: name,
+        type:type,
+        button: button
+      },
+      cssClass: 'sb-popover',
+    });
+    await alert.present();
+    const {data} = await alert.onDidDismiss();
+    return data
+
+  }
+
 }

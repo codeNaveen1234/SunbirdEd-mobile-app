@@ -13,7 +13,7 @@ import { AlertController, ModalController } from '@ionic/angular';
 import { UnnatiDataService } from '../../core/services/unnati-data.service';
 import { Location } from '@angular/common';
 import * as _ from 'underscore';
-import { CreateTaskFormComponent } from '../../shared';
+import { CreateTaskFormComponent, GenericPopUpService } from '../../shared';
 
 @Component({
   selector: 'app-project-details',
@@ -385,5 +385,4 @@ export class ProjectDetailsComponent implements OnInit {
     });
     return await modal.present();
   }
-
 }
