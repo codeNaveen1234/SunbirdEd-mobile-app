@@ -48,6 +48,8 @@ export class QuestionnairePage implements OnInit, OnDestroy {
   enableQuestionReadOut: boolean;
   networkAvailable;
   isTargeted :boolean;
+  programName: string
+  showJoinProgramPopup:boolean=false
   constructor(
     // public navCtrl: NavController,
     // public navParams: NavParams,
@@ -77,6 +79,7 @@ export class QuestionnairePage implements OnInit, OnDestroy {
       this.selectedEvidenceIndex = params.evidenceIndex ? parseInt(params.evidenceIndex): 0;
       this.selectedSectionIndex = params.sectionIndex ? parseInt(params.sectionIndex): 0;
       this.schoolName = params.schoolName;
+      this.programName = params.programName
     });
     // State is using for Template view for Deeplink.
     this.extrasState = this.router.getCurrentNavigation().extras.state;
@@ -154,6 +157,16 @@ export class QuestionnairePage implements OnInit, OnDestroy {
   }
 
   allowStart(){
+    if(!this.showJoinProgramPopup){
+      this.popupService.showJoinProgramForProjectPopup("FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP",this.programName,"observation","FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP").then(
+        (data:any)=>{
+          if(data){
+            this.showJoinProgramPopup = true
+          }
+        }
+      )
+      return
+    }
     this.popupService.showStartIMPForProjectPopUp('FRMELEMNTS_LBL_START_OBSERVATION_POPUP', 'FRMELEMNTS_LBL_START_OBSERVATION_POPUP_MSG1',
     'FRMELEMNTS_LBL_START_OBSERVATION_POPUP_MSG2','FRMELEMNTS_LBL_START_OBSERVATION_POPUP').then(
       (data:any)=>{
