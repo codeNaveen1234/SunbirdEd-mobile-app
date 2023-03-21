@@ -47,7 +47,8 @@ export class ObservationDetailComponent implements OnInit {
   networkFlag;
   searchQuery : string;
   showJoinProgramPopup:boolean=false;
-  programName: string
+  programName: string;
+  programJoined : boolean
   constructor(
     private headerService: AppHeaderService,
     private router: Router,
@@ -72,6 +73,7 @@ export class ObservationDetailComponent implements OnInit {
       this.solutionName = params.solutionName;
       this.entityType =params.entityType;
       this.programName = params.programName;
+      this.programJoined = params.programJoined=='true';
       let parameters = {
         solutionId: this.solutionId,
         programId: this.programId,
@@ -175,15 +177,15 @@ export class ObservationDetailComponent implements OnInit {
           observationId: this.observationId,
           entityId: entity._id,
           entityName: entity.name,
-          programName: this.programName
+          programName: this.programName,
+          programJoined: this.programJoined
         }
       }
     );
   }
 
   async addEntity() {
-    if(!this.showJoinProgramPopup){
-      this.joinProgramPopup()
+    if(!this.joinProgramPopup()){
       return
     }
     if(this.networkFlag){
@@ -291,8 +293,7 @@ export class ObservationDetailComponent implements OnInit {
   }
 
   async entityClickAction(e):Promise<any>{
-    if(!this.showJoinProgramPopup){
-      this.joinProgramPopup()
+    if(!this.joinProgramPopup()){
       return
     }
     if (this.solutionData.allowMultipleAssessemts) {
@@ -334,7 +335,8 @@ export class ObservationDetailComponent implements OnInit {
       queryParams: {
         submisssionId: submissionId,
         schoolName: entityName,
-        programName: this.programName
+        programName: this.programName,
+        programJoined: this.programJoined
       }
     });
   }
@@ -369,14 +371,21 @@ export class ObservationDetailComponent implements OnInit {
 
 
   joinProgramPopup(){
-    if(!this.showJoinProgramPopup){
+    if(!this.programJoined){
       this.popupService.showJoinProgramForProjectPopup("FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP",this.programName,"observation","FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP").then(
       (data:any)=>{
         if(data){
-          this.showJoinProgramPopup = true
+          this.programJoined = true
+          return true
+        }
+        else{
+          return false
         }
       }
       )
+    }
+    else{
+      return true
     }
   }
 

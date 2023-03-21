@@ -134,7 +134,8 @@ export class ObservationHomeComponent implements OnInit {
             observationId: observationId,
             solutionName: solutionName,
             entityType : solution.entityType ? solution.entityType  :'',
-            programName : programName
+            programName : programName,
+            programJoined : solution.programJoined ? solution.programJoined : false
           }
         }
       )
