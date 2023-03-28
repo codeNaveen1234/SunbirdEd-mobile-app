@@ -135,7 +135,7 @@ export class ObservationHomeComponent implements OnInit {
             solutionName: solutionName,
             entityType : solution.entityType ? solution.entityType  :'',
             programName : programName,
-            programJoined : solution.programJoined ? solution.programJoined : false
+            programJoined : solution.hasOwnProperty('programJoined') ? solution.programJoined : true
           }
         }
       )

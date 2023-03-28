@@ -39,7 +39,6 @@ export class DomainEcmLsitingComponent {
     actionButtons: [],
 };
   programName:string
-  programJoined:boolean
   constructor(
     private updateTracker: UpdateTrackerService,
     private utils: UtilsService,
@@ -61,8 +60,7 @@ export class DomainEcmLsitingComponent {
       this.submissionId = params.submisssionId;
       this.entityName = params.schoolName;
       this.allowMultipleAssessemts = params.allowMultipleAssessemts;
-      this.programName = params.programName,
-      this.programJoined = params.programJoined=='true';
+      this.programName = params.programName
     });
     this.extrasState = this.router.getCurrentNavigation().extras.state;
   }
@@ -242,7 +240,6 @@ export class DomainEcmLsitingComponent {
         sectionIndex: selectedSection,
         schoolName: this.entityName,
         programName: this.programName,
-        programJoined: this.programJoined
       }, state: this.extrasState //State is using for Template view for Deeplink.
     });
   }

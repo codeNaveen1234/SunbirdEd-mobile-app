@@ -56,7 +56,6 @@ export class ObservationSubmissionComponent implements OnInit {
   downloadedSubmissionList: any = [];
   msgs:any
   programName:string;
-  programJoined:boolean
   constructor(
     private headerService: AppHeaderService,
     private observationService: ObservationService,
@@ -83,8 +82,7 @@ export class ObservationSubmissionComponent implements OnInit {
       this.entityId = params.entityId;
       this.entityName = params.entityName;
       this.disableObserveAgain = params.disableObserveAgain == "true";
-      this.programName = params.programName,
-      this.programJoined = params.programJoined=='true';
+      this.programName = params.programName
       let data = {
         observationId: this.observationId,
         entityId: this.entityId
@@ -304,7 +302,6 @@ export class ObservationSubmissionComponent implements OnInit {
               schoolName: heading,
               allowMultipleAssessemts:true,
               programName:this.programName,
-              programJoined: this.programJoined
             }
           });
         } else {

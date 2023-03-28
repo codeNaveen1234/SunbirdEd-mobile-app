@@ -1,4 +1,5 @@
 <ion-content #pageTop>
+  <div (click)="joinProgram()">
   <div   id="stop">
   <div class="_container"  *ngIf="submissionId || extrasState">
     <ng-container *ngFor="let question of questions| slice:start:end; let i=index">
@@ -38,6 +39,7 @@
     </ng-container>
   </div>
   </div>
+</div>
 </ion-content>
 <app-footer-buttons *ngIf="questions" [updatedData]="questions[start]" [data]="questions[start]" [isFirst]="!start" [isStartBTNEnabled]="isTargeted" [showStartButton]="extrasState" [viewOnly]="isViewOnly"
   [enableGps]="captureGpsLocationAtQuestionLevel" [isSubmitted]="isCurrentEvidenceSubmitted"
