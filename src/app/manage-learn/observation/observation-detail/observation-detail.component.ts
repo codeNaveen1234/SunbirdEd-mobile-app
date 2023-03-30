@@ -46,7 +46,6 @@ export class ObservationDetailComponent implements OnInit {
   private _networkSubscription?: Subscription;
   networkFlag;
   searchQuery : string;
-  showJoinProgramPopup:boolean=false;
   programName: string;
   programJoined : boolean
   constructor(
