@@ -72,7 +72,6 @@ export class ProjectTemplateviewPage implements OnInit {
   clickedOnProfile :boolean = false;
   projectlisting:boolean = false;
   programlisting:boolean = false;
-  showJoinProgramPopup:boolean = false
 
   public backButtonFunc: Subscription;
 
@@ -222,7 +221,7 @@ export class ProjectTemplateviewPage implements OnInit {
   }
 
   doAction() {
-    if(!this.showJoinProgramPopup){
+    if(!this.project.programJoined){
       this.joinProgramPopup()
       return
     }
@@ -427,14 +426,12 @@ export class ProjectTemplateviewPage implements OnInit {
     }
   }
   joinProgramPopup(){
-    if(!this.showJoinProgramPopup){
       this.popupService.showJoinProgramForProjectPopup("FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP",this.project.programInformation.programName,"project","FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP").then(
       (data:any)=>{
         if(data){
-          this.showJoinProgramPopup = true
+          this.project.programJoined = true
         }
       }
       )
-    }
   }
 }

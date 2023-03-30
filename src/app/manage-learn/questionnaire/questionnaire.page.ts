@@ -48,6 +48,8 @@ export class QuestionnairePage implements OnInit, OnDestroy {
   enableQuestionReadOut: boolean;
   networkAvailable;
   isTargeted :boolean;
+  programName: string
+  programJoined: boolean = true
   isSurvey : boolean = false;
   constructor(
     // public navCtrl: NavController,
@@ -78,6 +80,8 @@ export class QuestionnairePage implements OnInit, OnDestroy {
       this.selectedEvidenceIndex = params.evidenceIndex ? parseInt(params.evidenceIndex): 0;
       this.selectedSectionIndex = params.sectionIndex ? parseInt(params.sectionIndex): 0;
       this.schoolName = params.schoolName;
+      // this.programName = params.programName
+      // this.programJoined = false
       this.isSurvey = params.isSurvey == 'true';
     });
     // State is using for Template view for Deeplink.
@@ -145,6 +149,7 @@ export class QuestionnairePage implements OnInit, OnDestroy {
     if (!this.isSurvey && this.isCurrentEvidenceSubmitted || this.isViewOnly) {
       document.getElementById('stop').style.pointerEvents = 'none';
     }
+    this.programName=data?.program?.name || ''
   }
 
   ionViewWillEnter() {
@@ -156,6 +161,9 @@ export class QuestionnairePage implements OnInit, OnDestroy {
   }
 
   allowStart(){
+    if(!this.joinProgram()){
+      return
+    }
     this.popupService.showStartIMPForProjectPopUp('FRMELEMNTS_LBL_START_OBSERVATION_POPUP', 'FRMELEMNTS_LBL_START_OBSERVATION_POPUP_MSG1',
     'FRMELEMNTS_LBL_START_OBSERVATION_POPUP_MSG2','FRMELEMNTS_LBL_START_OBSERVATION_POPUP').then(
       (data:any)=>{
@@ -176,6 +184,9 @@ export class QuestionnairePage implements OnInit, OnDestroy {
   ionViewDidLoad() {}
 
   async openQuestionMap() {
+    if(!this.joinProgram()){
+      return
+    }
     const questionModal = await this.modalCtrl.create({
       component: QuestionMapModalComponent,
       componentProps: {
@@ -511,4 +522,23 @@ export class QuestionnairePage implements OnInit, OnDestroy {
       this.toast.openToast(msg,'','top');
     });
   }
+
+  joinProgram(){
+    if(!this.programJoined){
+      this.popupService.showJoinProgramForProjectPopup("FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP",this.programName,"observation","FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP").then(
+        (data:any)=>{
+          if(data){
+            this.programJoined = true
+            return true
+          }
+          else{
+            return false
+          }
+        }
+      )
+    }else{
+      return true
+    }
+  }
+
 }

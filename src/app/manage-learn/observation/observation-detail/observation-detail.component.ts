@@ -20,7 +20,7 @@ import { TranslateService } from "@ngx-translate/core";
 import { ObservationService } from "../observation.service";
 import { storageKeys } from "../../storageKeys";
 import { Subscription } from "rxjs";
-import { EntitySearchLocalComponent } from "../../shared";
+import { EntitySearchLocalComponent, GenericPopUpService } from "../../shared";
 @Component({
   selector: "app-observation-detail",
   templateUrl: "./observation-detail.component.html",
@@ -46,6 +46,8 @@ export class ObservationDetailComponent implements OnInit {
   private _networkSubscription?: Subscription;
   networkFlag;
   searchQuery : string;
+  programName: string;
+  programJoined : boolean
   constructor(
     private headerService: AppHeaderService,
     private router: Router,
@@ -61,6 +63,7 @@ export class ObservationDetailComponent implements OnInit {
     private observationService: ObservationService,
     private localStorage: LocalStorageService,
     public commonUtilService: CommonUtilService,
+    private popupService: GenericPopUpService
   ) {
     this.routerParam.queryParams.subscribe(params => {
       this.observationId = params.observationId;
@@ -68,6 +71,8 @@ export class ObservationDetailComponent implements OnInit {
       this.programId = params.programId;
       this.solutionName = params.solutionName;
       this.entityType =params.entityType;
+      this.programName = params.programName;
+      this.programJoined = params.programJoined=='true';
       let parameters = {
         solutionId: this.solutionId,
         programId: this.programId,
@@ -161,7 +166,7 @@ export class ObservationDetailComponent implements OnInit {
     );
   }
 
-  goToObservationSubmission(entity) { 
+  goToObservationSubmission(entity) {
     this.router.navigate(
       [`/${RouterLinks.OBSERVATION}/${RouterLinks.OBSERVATION_SUBMISSION}`],
       {
@@ -170,13 +175,18 @@ export class ObservationDetailComponent implements OnInit {
           solutionId: this.solutionId,
           observationId: this.observationId,
           entityId: entity._id,
-          entityName: entity.name
+          entityName: entity.name,
+          programName: this.programName,
+          programJoined: this.programJoined
         }
       }
     );
   }
 
   async addEntity() {
+    if(!this.joinProgramPopup()){
+      return
+    }
     if(this.networkFlag){
       let entityListModal;
       entityListModal = await this.modalCtrl.create({
@@ -282,6 +292,9 @@ export class ObservationDetailComponent implements OnInit {
   }
 
   async entityClickAction(e):Promise<any>{
+    if(!this.joinProgramPopup()){
+      return
+    }
     if (this.solutionData.allowMultipleAssessemts) {
       this.goToObservationSubmission(e);  
       return;
@@ -320,7 +333,9 @@ export class ObservationDetailComponent implements OnInit {
     this.router.navigate([RouterLinks.DOMAIN_ECM_LISTING], {
       queryParams: {
         submisssionId: submissionId,
-        schoolName: entityName
+        schoolName: entityName,
+        programName: this.programName,
+        programJoined: this.programJoined
       }
     });
   }
@@ -352,4 +367,26 @@ export class ObservationDetailComponent implements OnInit {
       }
     });
   }
+
+
+  joinProgramPopup(){
+    if(!this.programJoined){
+      this.popupService.showJoinProgramForProjectPopup("FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP",this.programName,"observation","FRMELEMNTS_LBL_JOIN_PROGRAM_POPUP").then(
+      (data:any)=>{
+        if(data){
+          this.programJoined = true
+          return true
+        }
+        else{
+          return false
+        }
+      }
+      )
+    }
+    else{
+      return true
+    }
+  }
+
+
 }
