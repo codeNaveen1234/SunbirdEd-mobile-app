@@ -454,12 +454,12 @@ export class ProjectTemplateviewPage implements OnInit {
     let params ={
       isTargeted :this.isTargeted,
        programId: this.programId,
-       solutionId :this.solutionId,
+       solutionId :this.project.solutionId,
        isATargetedSolution :this.isATargetedSolution ,
        type  :this.isAssignedProject ? 'assignedToMe' : 'createdByMe',
        listing : listing
      }
-   this.router.navigate([`${RouterLinks.PROJECT}/${RouterLinks.PROJECT_TEMPLATE}`, this.solutionId], {
+   this.router.navigate([`${RouterLinks.PROJECT}/${RouterLinks.PROJECT_TEMPLATE}`, this.project.solutionId], {
      queryParams: params,
      skipLocationChange: false,
      replaceUrl: true,
