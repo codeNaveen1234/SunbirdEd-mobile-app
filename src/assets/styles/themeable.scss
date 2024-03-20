@@ -4,12 +4,12 @@
 
 html[data-theme="JOYFUL"]{
 
-  --app-primary:#00458F;
-  --app-primary-medium:#007AFF;
+  --app-primary:rgba(255,83,29,1);
+  --app-primary-medium:#693578;
   --app-primary-light-2:#94CCF5;
   --app-primary-light:#C6E7FF;
   --app-primary-background:#E9E8D9;
-  --app-primary-header:#FFD954;
+  --app-primary-header: rgba(255,83,29,1);
   --app-primary-header-light:#FFE487;
   --app-secondary-background:#F2F2EA;
   --app-tertiary:#6236FF;
@@ -46,7 +46,7 @@ html[data-theme="JOYFUL"]{
     ion-buttons{
       ion-button{
         --background: var(--app-primary-header) !important;
-        --color: var(--app-primary) !important;
+        --color: var(--app-white) !important;
         box-shadow: none !important;
       }
     }
@@ -57,10 +57,10 @@ html[data-theme="JOYFUL"]{
   }
 
   ion-button{
-    --background: var(--app-primary) !important;
+    --background: var(--app-primary-medium) !important;
     --color: var(--app-white) !important;
     --border-radius: 20px !important;
-    --border-color: var(--app-primary) !important;
+    --border-color: var(--app-primary-medium) !important;
     button{
       box-shadow: var(--button-style-shadow) !important;
     }
@@ -68,7 +68,7 @@ html[data-theme="JOYFUL"]{
 
   ion-button.button-clear{
     --background: transparent !important;
-    --color: var(--app-primary) !important;
+    --color: var(--app-primary-medium) !important;
   }
 
   button{
@@ -104,7 +104,7 @@ html[data-theme="JOYFUL"]{
   }
 
   ion-radio {
-    --color-checked: var(--app-primary) !important;
+    --color-checked: var(--app-primary-medium) !important;
     --color: var(--app-gray) !important;
   }
 
@@ -125,18 +125,18 @@ html[data-theme="JOYFUL"]{
 
   ion-alert{ // EXCEPTION
     [aria-checked=true].sc-ion-alert-md .alert-checkbox-icon.sc-ion-alert-md{
-      border-color: var(--app-primary) !important;
-      background-color: var(--app-primary) !important;
+      border-color: var(--app-primary-medium) !important;
+      background-color: var(--app-primary-medium) !important;
     }
 
     [aria-checked=true].sc-ion-alert-md .alert-radio-icon.sc-ion-alert-md{
-      border-color: var(--app-primary) !important;
+      border-color: var(--app-primary-medium) !important;
       .alert-radio-inner.sc-ion-alert-md{
-        background-color: var(--app-primary) !important;
+        background-color: var(--app-primary-medium) !important;
       }
     }
     button {
-      background-color: var(--app-primary) !important;
+      background-color: var(--app-primary-medium) !important;
       color: var(--app-white) !important;
     }
   }
@@ -151,22 +151,22 @@ html[data-theme="JOYFUL"]{
   }
 
   ion-title{
-    color: var(--app-primary) !important;
+    color: var(--app-primary-medium) !important;
   }
 
   // SelectBox popup multi select styles
   .select-box.select-alert, .ftue-changes.select-alert {
     .alert-button {
-      border-color: var(--app-primary) !important;
+      border-color: var(--app-primary-medium) !important;
       border-radius: 20px !important;
       text-transform: none;
     }
     .alert-button:first-child:not(:only-child) {
       background: transparent !important;
-      color: var(--app-primary) !important;
+      color: var(--app-primary-medium) !important;
     }
     .alert-button:last-child:not(:only-child) {
-      background: var(--app-primary) !important;
+      background: var(--app-primary-medium) !important;
       color: var(--app-white) !important;
     }
     .alert-wrapper{
@@ -191,12 +191,12 @@ html[data-theme="JOYFUL"]{
   // SB- button styles
   .sb-btn {
     border-radius: 20px !important;
-    background-color: var(--app-primary) !important;
+    background-color: var(--app-primary-medium) !important;
     color: var(--app-white) !important;
   }
 
   .sb-btn-primary-outline{
-    color: var(--app-primary) !important;
+    color: var(--app-primary-medium) !important;
     background-color: var(--app-white) !important;
   }
   app-user-home, app-discover {
@@ -1615,7 +1615,7 @@ html[data-theme="JOYFUL"]{
       --background: var(--app-primary-header) !important;
     }
     ion-progress-bar{
-      --ion-color-base: var(--app-primary) !important;
+      --ion-color-base: var(--app-primary-medium) !important;
     }
   }
 
@@ -1625,7 +1625,7 @@ html[data-theme="JOYFUL"]{
       border-radius: 1rem;
     }
     .alert-button {
-      border: 1px solid var(--app-primary) !important;
+      border: 1px solid var(--app-primary-medium) !important;
       border-radius: 2rem !important;
     }
     .alert-button:first-child:not(:only-child) {

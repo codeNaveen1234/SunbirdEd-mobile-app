@@ -73,6 +73,7 @@ h6 {
   width: 1.688rem;
   height: auto;
   // margin: 10px;
+  color:#fff;
   float: right;
 }
 
@@ -2157,12 +2158,12 @@ html[data-theme="JOYFUL"][data-mode="DARKMODE"] {
   }
   .task-card {
     .mandatory-ribben-label{
-      color: #000 !important;
-      background-color: #FFD954  !important;
+      color: #fff !important;
+      background-color: #693578 !important
     }
     .action-btn{
-      color: #000 !important;
-      --background: #FFD954  !important;
+      color: #fff !important;
+      --background: #693578 !important
     }
 
   }
@@ -2546,5 +2547,29 @@ app-slider-type-input {
   }
 .dark-mode-toggle:focus {
   outline: none;
+}
+}
+
+::ng-deep{
+  .sb-slider-pills-container .sb-grade-pills-container .pill:active, .sb-slider-pills-container .sb-grade-pills-container .pill.active{
+    background-color:#693578 !important;
+  }
+}
+
+
+::ng-deep{
+.sb-slider-pills-container .sb-grade-pills-container .pill:active,
+.sb-slider-pills-container .sb-grade-pills-container .pill:hover,
+.sb-slider-pills-container .sb-grade-pills-container .pill.active {
+  background-color:#693578 !important;
+}
+
+
+sb-library-filters{
+  .sb-slider-pills-container .sb-grade-pills-container .pill:active,
+  .sb-slider-pills-container .sb-grade-pills-container .pill:hover,
+  .sb-slider-pills-container .sb-grade-pills-container .pill.active {
+    background-color:#693578 !important;
+  }
 }
 }

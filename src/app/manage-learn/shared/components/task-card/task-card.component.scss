@@ -38,9 +38,9 @@
         padding-left: 0px;
     }
     .mandatory-ribben-label{
-        background-color: var(--app-primary-header) !important;
+        background-color: #693578 !important;
         padding: 2px 15px;
-        color: #000;
+        color: #fff;
         text-transform: uppercase;
         font-size: 0.813rem !important;
         border-radius: 4px;
@@ -49,8 +49,8 @@
     }
 
     .action-btn{
-        --background: var(--app-primary-header) !important;
-        color: var(--app-primary) !important;
+        --background: #693578 !important;
+        color: #fff !important;
         text-transform: none;
     }
 
@@ -69,8 +69,8 @@
 }
 .view-more {
     --background: transparent !important;
-    --border-color: var(--app-primary-medium) !important;
-    --color: var(--app-primary-medium) !important;
+    --border-color: #693578 !important;
+    --color: #693578 !important;
     width: 100%;
     text-transform: none;
     font-weight: bold;

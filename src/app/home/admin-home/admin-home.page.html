@@ -15,7 +15,7 @@
     <ng-container *ngFor="let section of displaySections">
       <div class="label" *ngIf="section?.title && section?.theme?.component !== 'sb-course-cards-hlist' && section?.theme?.component !== 'sb-library-cards-hlist'">{{section?.title | translateJson}}</div>
       <!-- Trackable contents -->
-      <ng-container *ngIf="section?.theme?.component === 'sb-course-cards-hlist'">
+      <!-- <ng-container *ngIf="section?.theme?.component === 'sb-course-cards-hlist'">
         <ng-container *ngFor="let subSection of section?.data?.sections">
           <ng-container *ngIf="subSection?.contents?.length">
             <sb-course-cards-hlist 
@@ -30,7 +30,7 @@
             </sb-course-cards-hlist>
           </ng-container>
         </ng-container>
-      </ng-container>
+      </ng-container> -->
   
       <!-- Pills -->
       <ng-container *ngIf="section?.theme?.component === 'sb-pills-grid'">
@@ -41,8 +41,11 @@
           [viewMoreText]="section?.theme?.inputs?.viewMoreText | translateJson"
           [viewLessText]="section?.theme?.inputs?.viewLessText | translateJson"
           (select)="onPillClick($event)">
-          <sb-pill-item *ngFor="let pillData of section.data" [name]="pillData?.title | translateJson" [icon]="pillData?.icon"
+          <div *ngFor="let pillData of section.data">
+            {{pillData?.title}}
+          <sb-pill-item  [name]="pillData?.title | translateJson" [icon]="pillData?.icon"
             [value]="pillData"></sb-pill-item>
+            </div>
         </sb-pills-grid>
       </ng-container>
   

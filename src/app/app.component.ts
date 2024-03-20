@@ -830,7 +830,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   async handleHeaderEvents($event) {
     if ($event.name === 'back') {
       const routeUrl = this.router.url;
-
+      console.log(routeUrl,"routeUrl");
       if ((routeUrl.indexOf(RouterLinks.USER_TYPE_SELECTION) !== -1)
         || (routeUrl.indexOf(RouterLinks.CHAPTER_DETAILS) !== -1)
         || (routeUrl.indexOf(RouterLinks.CURRICULUM_COURSES) !== -1)

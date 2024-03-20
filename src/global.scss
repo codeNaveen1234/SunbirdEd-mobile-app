@@ -215,10 +215,10 @@ sunbird-pdf-player .sunbird-pdf-palyer-container pdf-viewer iframe{
   height: 3rem;
 }
 .certificate-tag{
-  background-color: var(--app-primary-header) !important;
+  background-color: #693578 !important;
   padding: 0px 5px;
   padding-top: 2px;
-  color: #000;
+  color: #fff;
   text-transform: uppercase;
   font-size: 0.813rem !important;
   border-radius: 4px;
@@ -246,4 +246,31 @@ table.dataTable thead th:first-child, tbody td:first-child{
   position: sticky !important;
   left:0 !important;
   z-index: 2;
+}
+
+::ng-deep{
+  .sb-slider-pills-container .sb-grade-pills-container .pill:active, .sb-slider-pills-container .sb-grade-pills-container .pill.active{
+    background-color:#693578 !important;
+  }
+
+  [_nghost-chv-c214] .sb-slider-pills-container[_ngcontent-chv-c214] .sb-grade-pills-container[_ngcontent-chv-c214] .pill[_ngcontent-chv-c214]:active, [_nghost-chv-c214] .sb-slider-pills-container[_ngcontent-chv-c214] .sb-grade-pills-container[_ngcontent-chv-c214] .pill[_ngcontent-chv-c214]:hover, [_nghost-chv-c214] .sb-slider-pills-container[_ngcontent-chv-c214] .sb-grade-pills-container[_ngcontent-chv-c214] .pill.active[_ngcontent-chv-c214]{
+    background-color:#693578 !important;
+  }
+}
+
+::ng-deep{
+.sb-slider-pills-container .sb-grade-pills-container .pill:active,
+.sb-slider-pills-container .sb-grade-pills-container .pill:hover,
+.sb-slider-pills-container .sb-grade-pills-container .pill.active {
+  background-color:#693578 !important;
+}
+
+
+sb-library-filters{
+  .sb-slider-pills-container .sb-grade-pills-container .pill:active,
+  .sb-slider-pills-container .sb-grade-pills-container .pill:hover,
+  .sb-slider-pills-container .sb-grade-pills-container .pill.active {
+    background-color:#693578 !important;
+  }
+}
 }

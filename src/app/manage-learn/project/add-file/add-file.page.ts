@@ -163,20 +163,16 @@ export class AddFilePage implements OnInit {
     this.taskId ? this.task.isEdit = true :'';
   }
 
-  async onAction(event) {
+  onAction(event) {
     if(!this.taskId){
-      this.popupService.showPPPForProjectPopUp('FRMELEMNTS_LBL_EVIDENCES_CONTENT_POLICY', 'FRMELEMNTS_LBL_EVIDENCES_CONTENT_POLICY_TEXT', 'FRMELEMNTS_LBL_EVIDENCES_CONTENT_POLICY_LABEL', 'FRMELEMNTS_LBL_UPLOAD_EVIDENCES', 'https://diksha.gov.in/term-of-use.html', 'contentPolicy').then(async(data: any) => {
+      this.popupService.showPPPForProjectPopUp('FRMELEMNTS_LBL_EVIDENCES_CONTENT_POLICY', 'FRMELEMNTS_LBL_EVIDENCES_CONTENT_POLICY_TEXT', 'FRMELEMNTS_LBL_EVIDENCES_CONTENT_POLICY_LABEL', 'FRMELEMNTS_LBL_UPLOAD_EVIDENCES', 'https://diksha.gov.in/term-of-use.html', 'contentPolicy').then((data: any) => {
         if (data.isClicked) {
           if(data.isChecked){
             if (event == 'openLink') {
               this.toggleLinkModal();
               return;
             }
-            await this.attachmentService.openAttachmentSource(event, this.attachments);
-            setTimeout(() => {
-              this.update('save')
-            }, 1000);
-
+            this.attachmentService.openAttachmentSource(event, this.attachments);
           }else{
             this.toast.showMessage('FRMELEMNTS_MSG_EVIDENCES_CONTENT_POLICY_REJECT', 'danger');
           }
@@ -187,10 +183,7 @@ export class AddFilePage implements OnInit {
         this.toggleLinkModal();
         return;
       }
-      await this.attachmentService.openAttachmentSource(event, this.attachments);
-      setTimeout(() => {
-        this.update('save')
-      }, 1000);
+      this.attachmentService.openAttachmentSource(event, this.attachments);
     }
   }
 

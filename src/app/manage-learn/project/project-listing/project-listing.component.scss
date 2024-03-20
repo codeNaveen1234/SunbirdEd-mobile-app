@@ -6,7 +6,7 @@
 }
 
 .view-more {
-   --background: var(--app-primary-background) !important;
+   --background:var(--app-primary-background) !important;
    --border-color: var(--app-primary-medium) !important;
    --color: var(--app-primary-medium) !important;
    height: 2.25rem;
@@ -46,3 +46,18 @@ ion-searchbar ::ng-deep .searchbar-input{
 .header{
   margin-left: 13px;
 }
+
+::ng-deep{
+  .sb-slider-pills-container .sb-grade-pills-container .pill:active,
+  .sb-slider-pills-container .sb-grade-pills-container .pill:hover,
+  .sb-slider-pills-container .sb-grade-pills-container .pill.active {
+    background-color:#693578 !important;
+  }
+  sb-library-filters{
+  .sb-slider-pills-container .sb-grade-pills-container .pill:active,
+  .sb-slider-pills-container .sb-grade-pills-container .pill:hover,
+  .sb-slider-pills-container .sb-grade-pills-container .pill.active {
+    background-color:#693578 !important;
+  }
+}
+  }

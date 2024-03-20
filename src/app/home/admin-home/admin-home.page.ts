@@ -84,6 +84,7 @@ export class AdminHomePage implements OnInit, OnDestroy, OnTabViewWillEnter {
   ) {}
 
   async ngOnInit() {
+console.log("87");
     await this.getUserProfileDetails();
     this.events.subscribe(AppGlobalService.PROFILE_OBJ_CHANGED, async () => {
       await this.getUserProfileDetails();
@@ -107,10 +108,12 @@ export class AdminHomePage implements OnInit, OnDestroy, OnTabViewWillEnter {
   }
 
   async tabViewWillEnter() {
+    await this.router.navigate([RouterLinks.PROJECT], {});
     await this.headerService.showHeaderWithHomeButton(['download', 'notification']);
   }
 
   async ionViewWillEnter() {
+await this.router.navigate([RouterLinks.PROJECT], {});
     this.events.subscribe('update_header', async () => {
       await this.headerService.showHeaderWithHomeButton(['download', 'notification']);
     });
@@ -227,6 +230,7 @@ export class AdminHomePage implements OnInit, OnDestroy, OnTabViewWillEnter {
 
     this.displaySections = await this.contentAggregatorHandler.newAggregate(request, AggregatorPageType.ADMIN_HOME);
     this.displaySections = this.contentAggregatorHandler.populateIcons(this.displaySections);
+    console.log( this.displaySections," this.displaySections");
   }
 
   async onPillClick(event) {

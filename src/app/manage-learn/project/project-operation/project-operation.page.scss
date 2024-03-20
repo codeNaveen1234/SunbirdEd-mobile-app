@@ -11,6 +11,7 @@
     margin-top: 20px;
     z-index: 99999999999999999999;
     margin-left: 12px;
+    color:#693578
 }
 
 .project-title {
@@ -21,7 +22,7 @@
     }
 }
 .resources-link{
-    color:var(--app-primary);
+    color:var(--app-primary-medium);
 }
 
 .program-block {
@@ -72,7 +73,7 @@
     text-align: center;
     padding: 15px;
     /* min-height: 50px; */
-    background: var(--app-primary);
+    background: var(--app-primary-medium);
     color: $white;
 }
 

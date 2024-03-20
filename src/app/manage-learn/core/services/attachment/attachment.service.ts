@@ -338,13 +338,19 @@ export class AttachmentService {
     this.payload = payload;
     switch (type) {
       case 'openCamera':
-        await this.takePicture(this.camera.PictureSourceType.CAMERA);
+        this.takePicture(this.camera.PictureSourceType.CAMERA);
         break;
       case 'openGallery':
-        await this.takePicture(this.camera.PictureSourceType.PHOTOLIBRARY);
+        this.takePicture(this.camera.PictureSourceType.PHOTOLIBRARY);
+        break;
+      case 'openImage':
+        this.takePicture(this.camera.PictureSourceType.PHOTOLIBRARY, this.camera.MediaType.PICTURE);
+        break;
+      case 'openVideo':
+        this.takePicture(this.camera.PictureSourceType.PHOTOLIBRARY, this.camera.MediaType.VIDEO);
         break;
       case 'openFiles':
-        await this.openFile();
+        this.openFile();
         break;
     }
   }

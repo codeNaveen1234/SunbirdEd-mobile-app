@@ -10,6 +10,7 @@
       (ionFocus)="announceToTalkBack('Expanded')">
         <img src="./assets/imgs/ic_burger_menu.svg" role="button" class="tool-icon" alt="menu">
       </ion-button>
+
     </ion-buttons>
 
     <ion-buttons class="sb-hamburger" slot="start" *ngIf="!headerConfig?.showBurgerMenu">
@@ -66,35 +67,11 @@
         (click)="emitEvent($event, 'settings');">
         <ion-icon name="settings"></ion-icon>
       </ion-button>
-      <ion-button aria-label="notifications" icon-only *ngIf="headerConfig?.actionButtons?.indexOf('notification') >=0"
-        (click)="emitEvent($event, 'notification');" class="active-download-icon">
-        <img src="assets/imgs/notification.svg" class="tool-icon" alt="notification" role="button">
-        <ion-badge class="badge-container" *ngIf="notificationCount.unreadCount">{{notificationCount.unreadCount}}</ion-badge>
-      </ion-button>
-      <ion-button aria-label="search" icon-only *ngIf="headerConfig?.actionButtons?.indexOf('search') >=0"
-        (click)="emitEvent($event, 'search');">
-        <img src="./assets/imgs/ic_search.png"  role="button" class="tool-icon" alt="search">
-      </ion-button>
-      <ion-button aria-label="information" icon-only *ngIf="headerConfig?.actionButtons?.indexOf('information') >=0"
-        (click)="emitEvent($event, 'information');">
-        <img src="./assets/imgs/ic_info_circle.svg" role="button" class="tool-icon" alt="information">
-      </ion-button>
-      <ion-button aria-label="person" icon-only *ngIf="headerConfig?.actionButtons?.indexOf('person') >=0"
-        (click)="emitEvent($event, 'person');">
-        <ion-icon name="person"></ion-icon>
-      </ion-button>
-      <ion-button aria-label="filter" icon-only *ngIf="headerConfig?.actionButtons?.indexOf('filter') >=0"
-        (click)="emitEvent($event, 'filter');">
-        <img src="./assets/imgs/ic_action_filter.svg" role="button" class="tool-icon" alt="filter">
-      </ion-button>
-      <ion-button aria-label="filter applied" icon-only *ngIf="headerConfig?.actionButtons?.indexOf('filter-applied') >=0"
-        (click)="emitEvent($event, 'filter');">
-        <img src="./assets/imgs/ic_action_filter_applied.png" role="button" class="tool-icon" alt="filter applied">
-      </ion-button>
-      <ion-button aria-label="share" icon-only *ngIf="headerConfig?.actionButtons?.indexOf('share') >=0"
-        (click)="emitEvent($event, 'share');">
-        <ion-icon name="share" role="button" aria-label="share" class="ion-float-right"></ion-icon>
-      </ion-button>
+        <img src="./assets/imgs/pms.jpg"  role="button" class="tool-icon" style="width: 115px;
+        height: 45px;
+        padding: 5px;
+        background: #fff;
+        border-radius: 6px;" alt="search">
       <ion-buttons aria-label="sync done" icon-only *ngIf="headerConfig?.actionButtons?.indexOf('sync-done') >=0" style="font-size: 1.8rem;">
         <ion-icon name="cloud-done" role="button" class="ion-float-right" aria-label="sync done" style="color: green;"></ion-icon>
       </ion-buttons>

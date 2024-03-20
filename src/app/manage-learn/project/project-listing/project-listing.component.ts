@@ -34,7 +34,7 @@ export class ProjectListingComponent {
     searchText: string = '';
     headerConfig = {
         showHeader: true,
-        showBurgerMenu: false,
+        showBurgerMenu: true,
         actionButtons: [],
     };
     projects = [];
@@ -188,7 +188,7 @@ export class ProjectListingComponent {
         this.headerConfig = this.headerService.getDefaultPageConfig();
         this.headerConfig.actionButtons = [];
         this.headerConfig.showHeader = true;
-        this.headerConfig.showBurgerMenu = false;
+        this.headerConfig.showBurgerMenu = true;
         this.headerService.updatePageConfig(this.headerConfig);
         this.handleBackButton();
     }

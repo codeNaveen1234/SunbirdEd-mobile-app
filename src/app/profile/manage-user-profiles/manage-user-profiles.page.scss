@@ -37,7 +37,7 @@ ion-button{
 
 ion-footer{
   ion-button{
-    --background: #{$blue} !important;
+    --background: #693578 !important;
   }
 }
 
@@ -52,7 +52,7 @@ ion-footer{
 }
 
 .sb-new-btn {
-  background-color: $blue;
+  background-color: #693578;
   color: map-get($colors, white);
   width: 100%;
   height: 2.5rem;

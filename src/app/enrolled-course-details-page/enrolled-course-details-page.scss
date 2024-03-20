@@ -290,7 +290,7 @@
     }
   }
   .sc-ion-segment-md-h{
-    --color-checked : #{$blue};
+    --color-checked : #693578;
     font-weight: bold;
     --color: #{map-get($colors, cornflower_blue)};
   }
@@ -546,7 +546,7 @@ ion-segment-button{
 
 .save-changes{
   color: map-get($colors, white);
-  background-color: $blue;
+  background-color: #693578;
   padding: 12px 45px;
   outline: none;
   border: none;

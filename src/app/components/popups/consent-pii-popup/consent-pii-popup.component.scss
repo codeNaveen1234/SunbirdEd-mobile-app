@@ -7,11 +7,11 @@
 }
 
 .cr-terms-checkbox{
-  --background-checked: #{$blue};
-  --border-color: #{$blue};
+  --background-checked: #693578 !important;
+  --border-color: #693578 !important;
   --border-radius: 4px;
   --border-width: 0.063rem;
-  --border-color-checked:#{$blue};
+  --border-color-checked:#693578 !important;
 }
 .cr-input-primary {
   display: inline-flex;
@@ -74,19 +74,19 @@
 }
 .save-changes{
   color: white;
-  background-color: $blue;
+  background-color: #693578 !important;
   font-size: 1rem;
   padding: 8px 0;
   margin-left: 18px;
-  border: 2px solid $blue;
+  border: 2px solid #693578 !important;
   width: 45%;
 }
 .save-changes-not-agree{
-  color: $blue;
+  color: #693578 !important;
   background-color: white;
   font-size: 1rem;
   padding: 8px 0;
-  border: 2px solid $blue;
+  border: 2px solid #693578 !important;
   width: 45%;
   margin-left: 10px;
 }
@@ -114,7 +114,7 @@
 }
 
 .terms-info{
-  color: $blue
+  color: #693578 !important;
 }
 
 ion-icon {

@@ -23,7 +23,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         margin-right: 15px;
-        border: 1px solid $light-blue;
+        border: 1px solid --app-primary-medium;
         padding: 5px;
         color: map-get($colors, gray_solid);
         position: relative;
